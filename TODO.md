@@ -4,7 +4,7 @@
 
 ## 1. Бренд и домен — `site.config.mjs`
 - [ ] `BRAND_NAME`: подтвердить название (сейчас «Founders Lab», по аккаунту x.com/LAB_FOUNDERS)
-- [ ] `url` или переменная окружения `SITE_URL`: боевой домен
+- [x] домен: https://lab-founders.com
 
 ## 2. Контакты — `site.config.mjs → contact`
 - [ ] `email`

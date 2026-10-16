@@ -14,7 +14,7 @@ export const en = {
     services: {
       title: `Services: product design, 3D printing, laser engraving, packaging — ${B}`,
       description:
-        'Product design and 3D modelling, 3D printed prototypes and small batches, laser engraving and cutting, packaging design and box prototypes — under one roof.',
+        'Product design and 3D modeling, 3D printed prototypes and small batches, laser engraving and cutting, packaging design and box prototypes — under one roof.',
     },
     process: {
       title: `Process: from idea to prototype to small batch — ${B}`,
@@ -129,7 +129,7 @@ export const en = {
     {
       id: 'design',
       no: '01',
-      title: 'Product design & 3D modelling',
+      title: 'Product design & 3D modeling',
       short: 'From a sketch — or just a description — to a print-ready 3D model.',
       body: 'What does it do, where does it live, how is it held? We start there. Then we build the model around real dimensions, tolerances, how the parts go together and how it will actually be made. We review it on screen together, so anything you don’t like changes before a single print.',
       outputs: ['Sketches and dimensions', 'Print-ready 3D model (STL / 3MF)', 'Editable CAD file (STEP)', 'Simple technical drawing'],
@@ -215,7 +215,7 @@ export const en = {
   ],
 
   faq: [
-    { q: 'I don’t have a 3D model. Can I still come to you?', a: 'Of course. Most projects start with a sentence, a sketch, or “like this, but different”. We do the 3D modelling — your job is to tell us what you want.' },
+    { q: 'I don’t have a 3D model. Can I still come to you?', a: 'Of course. Most projects start with a sentence, a sketch, or “like this, but different”. We do the 3D modeling — your job is to tell us what you want.' },
     { q: 'How much does a first prototype cost?', a: 'It depends a lot on the product: size, material, model complexity and how many versions it will take. Once you send a brief, we prepare an itemised quote. We explain what drives the price on the [[pricing page]](pricing). [[TODO: is the first call / quote free?]]' },
     { q: 'How long does it take?', a: 'A simple part and a multi-part device enclosure take very different amounts of time. Once we’ve seen your brief, we give you an estimated timeline for each step. [[TODO: typical lead times]]' },
     { q: 'Is there a minimum order?', a: 'No. You can start with a single prototype. The upper limit of a small batch depends on the project. [[TODO: small batch upper limit]]' },

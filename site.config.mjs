@@ -15,8 +15,8 @@ export default {
     monogram: BRAND_NAME.split(/\s+/).map((w) => w[0]).join('').slice(0, 2),
   },
 
-  // TODO: production domain (no trailing slash). Can also be set with the SITE_URL env variable.
-  url: process.env.SITE_URL || 'https://example.com',
+  // Production domain (no trailing slash). Can be overridden with the SITE_URL env variable.
+  url: process.env.SITE_URL || 'https://lab-founders.com',
 
   contact: {
     email: '', // TODO: e.g. hello@yourdomain.com
