@@ -26,7 +26,6 @@ const fill = (s: string) =>
 <Base lang={lang} page={doc}>
   <PageHero lang={lang} page={doc} kicker={d.title} title={d.title} sheet={doc === 'privacy' ? 9 : 10}>
     <p class="mt-6 inline-flex flex-wrap items-center gap-3">
-      <span class="sticky-note -rotate-1 py-2 font-medium">{t.ui.draft}</span>
       <span class="label">{t.ui.lastUpdated}: {f.date(config.legal.updated)}</span>
     </p>
   </PageHero>

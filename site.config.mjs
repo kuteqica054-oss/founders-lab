@@ -6,7 +6,7 @@
 // ─────────────────────────────────────────────────────────────
 
 /** Brand name. Used everywhere: wordmark, titles, OG images, schema.org, legal pages. */
-export const BRAND_NAME = 'Founders Lab'; // TODO: confirm final name
+export const BRAND_NAME = 'Founders Lab';
 
 export default {
   brand: {
@@ -19,33 +19,33 @@ export default {
   url: process.env.SITE_URL || 'https://lab-founders.com',
 
   contact: {
-    email: '', // TODO: e.g. hello@yourdomain.com
-    phone: '', // TODO: display format, e.g. (617) 555-0123
-    whatsapp: '', // TODO (optional): digits only with country code, e.g. 16175550123. Empty → button hidden
+    email: 'info@lab-founders.com', // also receives brief-form submissions
+    phone: '+1 (225) 463-1805',
+    whatsapp: '12254631805', // digits only with country code. Empty → button hidden
     location: {
-      street: '', // TODO: street address of the workshop
+      street: '65 Commonwealth Ave',
       city: 'Boston',
       region: 'MA',
-      postalCode: '', // TODO: ZIP code
+      postalCode: '02116',
       country: 'USA',
       countryCode: 'US',
     },
-    hours: '', // TODO: e.g. Mon–Fri, 9am–6pm ET
+    hours: 'Mon–Sat, 9am–10pm ET',
   },
 
-  // TODO: legal entity — shown in the footer and legal pages.
+  // Legal entity — shown in the footer and legal pages.
   legal: {
-    entity: '', // TODO: e.g. Founders Lab LLC
-    privacyEmail: '', // TODO: address for privacy requests (falls back to contact.email)
+    entity: 'Founders Lab LLC',
+    privacyEmail: 'info@lab-founders.com',
     governingState: 'Massachusetts',
-    venue: '', // TODO: courts with jurisdiction, e.g. "the state and federal courts located in Suffolk County, Massachusetts"
-    updated: '2026-10-16', // TODO: update when legal texts are finalised
+    venue: 'the state and federal courts located in Suffolk County, Massachusetts',
+    updated: '2026-10-16', // date of the current legal texts
   },
 
-  // Social links. Leave '' to show a TODO placeholder.
+  // Social links. Empty ones are hidden.
   social: {
-    instagram: '', // TODO
-    linkedin: '', // TODO
+    instagram: '',
+    linkedin: '',
     x: 'https://x.com/LAB_FOUNDERS',
   },
 
@@ -54,16 +54,16 @@ export default {
     // 'netlify'   — Netlify Forms (supports file uploads up to 8 MB per submission)
     // 'formspree' — Formspree (file uploads require a paid plan)
     provider: 'php',
-    formspreeId: '', // TODO: when provider = 'formspree', e.g. 'xayzabcd'
+    formspreeId: '', // only when provider = 'formspree'
     netlifyFormName: 'brief',
     maxTotalMB: 8, // total size of attachments per brief
     fileInputs: 3,
-    // TODO (optional): budget ranges for the brief form. Empty → free-text field.
+    // Optional budget ranges for the brief form. Empty → free-text field.
     // Example: [{ value: 'under-5k', label: 'Under $5,000' }]
     budgetRanges: [],
   },
 
   // Photo placeholders: 'always' | 'dev' | 'never'
   // 'always' shows dashed frames where real photos should go (good while drafting).
-  photoPlaceholders: 'always',
+  photoPlaceholders: 'never',
 };

@@ -21,3 +21,5 @@ export const socialLinks = [
   { key: 'linkedin', icon: 'linkedin', label: 'LinkedIn', href: config.social.linkedin },
   { key: 'x', icon: 'xLogo', label: 'X', href: config.social.x },
 ] as const;
+
+export const visibleSocialLinks = socialLinks.filter((s) => s.href);

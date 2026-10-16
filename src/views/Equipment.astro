@@ -13,6 +13,7 @@ import Icon from '../components/Icon.astro';
 import { useDict, type Lang } from '../i18n';
 import { path } from '../i18n/routes';
 import { breadcrumbLd } from '../lib/schema';
+import config from '../../site.config.mjs';
 interface Props {
   lang: Lang;
 }
@@ -21,6 +22,8 @@ const t = useDict(lang);
 const ep = t.equipmentPage;
 const eq = t.equipmentSpecs;
 const h = t.home.equipment;
+// Set to true once real photos are passed to the PhotoSlots below
+const showPhotos = config.photoPlaceholders !== 'never';
 const photoSlots = [
   { note: 'Workshop overview: bench, shelves, machines', size: '2400 × 1600 px', aspect: '3/2' },
   { note: '3D printers at work', size: '1600 × 1200 px', aspect: '4/3' },
@@ -80,13 +83,13 @@ const photoSlots = [
     </div>
   </section>
 
-  <section class="wrap py-16 sm:py-20" aria-labelledby="ph-h">
+  {showPhotos && <section class="wrap py-16 sm:py-20" aria-labelledby="ph-h">
     <h2 id="ph-h" class="text-3xl">{ep.photoNote}</h2>
     <!-- PHOTOS: drop real workshop shots into src/assets/photos and pass them as src={…} -->
     <div class="mt-8 grid gap-5 md:grid-cols-2">
       {photoSlots.map((p) => <PhotoSlot note={p.note} size={p.size} aspect={p.aspect} label={t.ui.photoSlot} />)}
     </div>
-  </section>
+  </section>}
 
   <CtaBand lang={lang} />
 </Base>

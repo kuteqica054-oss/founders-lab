@@ -1,5 +1,4 @@
 ---
-import Rich from './Rich.astro';
 import { useDict, type Lang } from '../i18n';
 interface Props {
   lang: Lang;
@@ -39,7 +38,7 @@ const rows = limit ? m.rows.slice(0, limit) : m.rows;
             </td>
             <td class="block pt-2 md:table-cell md:px-4 md:py-4 md:align-top">
               <span class="label md:hidden">{m.cols[4]}: </span>
-              <Rich lang={lang} text={m.availability} />
+              {r.stock}
             </td>
           </tr>
         ))

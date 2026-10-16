@@ -6,7 +6,7 @@ import { useDict, todoChip, type Lang, type RouteKey } from '../i18n';
 import { path } from '../i18n/routes';
 import { fmt } from '../lib/format';
 import config from '../../site.config.mjs';
-import { cityLine, fullAddress, telHref, socialLinks } from '../lib/contact';
+import { cityLine, fullAddress, telHref, visibleSocialLinks } from '../lib/contact';
 interface Props {
   lang: Lang;
   page: RouteKey;
@@ -15,7 +15,7 @@ const { lang, page } = Astro.props;
 const t = useDict(lang);
 const f = fmt(lang);
 const c = config.contact;
-const socials = socialLinks;
+const socials = visibleSocialLinks;
 const val = (v: string, note: string) => (v ? v : todoChip(note));
 ---
 
