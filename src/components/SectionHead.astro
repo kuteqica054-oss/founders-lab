@@ -1,0 +1,43 @@
+---
+import Rich from './Rich.astro';
+import type { Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  no?: string;
+  kicker: string;
+  title: string;
+  lead?: string;
+  id?: string;
+  tone?: 'paper' | 'blueprint';
+  as?: 'h1' | 'h2';
+  class?: string;
+}
+const { lang, no, kicker, title, lead, id, tone = 'paper', as: H = 'h2', class: cls = '' } = Astro.props;
+const dark = tone === 'blueprint';
+---
+
+<header class:list={['max-w-3xl', cls]} data-reveal>
+  <p
+    class:list={[
+      'mono mb-4 flex items-center gap-3 text-[0.8rem] font-medium',
+      dark ? 'text-blueprint-line' : 'text-filament-ink',
+    ]}
+  >
+    {no && <span class:list={['border px-1.5 py-0.5', dark ? 'border-blueprint-line' : 'border-filament-ink']}>{no}</span>}
+    <span>{kicker}</span>
+    <span aria-hidden="true" class:list={['h-px w-10', dark ? 'bg-blueprint-line' : 'bg-filament-ink']}></span>
+  </p>
+  <H id={id} class:list={[H === 'h1' ? 'text-[2.6rem] sm:text-6xl lg:text-7xl' : 'text-[2.1rem] sm:text-5xl']}>
+    {title}
+  </H>
+  {
+    lead && (
+      <Rich
+        as="p"
+        text={lead}
+        lang={lang}
+        class:list={['mt-5 max-w-2xl text-lg sm:text-xl', dark ? 'text-blueprint-paper/85' : 'text-ink-2']}
+      />
+    )
+  }
+</header>

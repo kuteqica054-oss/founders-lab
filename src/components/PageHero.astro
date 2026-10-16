@@ -1,0 +1,42 @@
+---
+import SectionHead from './SectionHead.astro';
+import { useDict, type Lang, type RouteKey } from '../i18n';
+import { path } from '../i18n/routes';
+interface Props {
+  lang: Lang;
+  page: RouteKey;
+  kicker: string;
+  title: string;
+  lead?: string;
+  sheet: number;
+}
+const { lang, page, kicker, title, lead, sheet } = Astro.props;
+const t = useDict(lang);
+const homeLabel = 'Home';
+---
+
+<section class="bg-mm border-b-2 border-ink">
+  <div class="wrap py-10 sm:py-14 lg:py-16">
+    <nav aria-label="Breadcrumb" class="mono mb-8 text-sm">
+      <ol class="flex flex-wrap items-center gap-2 text-ink-3">
+        <li><a href={path('home', lang)} class="text-ink-2 hover:text-ink">{homeLabel}</a></li>
+        <li aria-hidden="true">/</li>
+        <li aria-current="page" class="text-ink">{kicker}</li>
+      </ol>
+    </nav>
+    <div class="grid items-end gap-8 lg:grid-cols-12">
+      <div class="lg:col-span-9">
+        <SectionHead lang={lang} as="h1" kicker={kicker} title={title} lead={lead} no={String(sheet).padStart(2, '0')} />
+      </div>
+      <dl class="mono hidden border-[1.5px] border-ink bg-paper text-xs lg:col-span-3 lg:grid lg:grid-cols-2" aria-hidden="true">
+        <dt class="border-r border-b border-ink/40 px-3 py-2 text-ink-3">{t.ui.sheet}</dt>
+        <dd class="border-b border-ink/40 px-3 py-2">{String(sheet).padStart(2, '0')} / 10</dd>
+        <dt class="border-r border-b border-ink/40 px-3 py-2 text-ink-3">{t.ui.scale}</dt>
+        <dd class="border-b border-ink/40 px-3 py-2">1:1</dd>
+        <dt class="border-r border-ink/40 px-3 py-2 text-ink-3">{t.ui.rev}</dt>
+        <dd class="px-3 py-2">A</dd>
+      </dl>
+    </div>
+    <slot />
+  </div>
+</section>

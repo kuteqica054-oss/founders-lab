@@ -1,0 +1,27 @@
+---
+import Icon from './Icon.astro';
+import DimDivider from './DimDivider.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const line = 'Got an idea? Let’s start there.';
+---
+
+<section class="bg-filament border-b-2 border-ink">
+  <div class="wrap py-14 sm:py-16">
+    <DimDivider tone="ink" label="→" class="mb-10 text-ink" />
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <p class="font-display max-w-3xl text-4xl leading-none font-bold sm:text-5xl">{line}</p>
+      <div class="flex flex-wrap gap-3">
+        <a href={path('contact', lang)} class="btn bg-ink text-paper shadow-[4px_4px_0_var(--color-paper)] hover:bg-paper hover:text-ink">
+          {t.ui.cta} <Icon name="arrowRight" size={18} />
+        </a>
+        <a href={path('process', lang)} class="btn btn-ghost">{t.ui.howItWorks}</a>
+      </div>
+    </div>
+  </div>
+</section>

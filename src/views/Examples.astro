@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import ExampleCard from '../components/ExampleCard.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Rich from '../components/Rich.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { breadcrumbLd } from '../lib/schema';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const xp = t.examplesPage;
+const all = (await getCollection('examples', (e) => e.data.lang === lang)).sort((a, b) => a.data.order - b.data.order);
+// Real projects first, then scenarios
+const projects = all.filter((e) => e.data.kind === 'project');
+const scenarios = all.filter((e) => e.data.kind === 'scenario');
+---
+
+<Base lang={lang} page="examples" jsonLd={[breadcrumbLd(lang, [{ name: xp.kicker, path: path('examples', lang) }])]}>
+  <PageHero lang={lang} page="examples" kicker={xp.kicker} title={xp.title} lead={xp.lead} sheet={5}>
+    <ul class="mono mt-8 flex flex-wrap gap-2 text-sm">
+      {
+        scenarios.map((e) => (
+          <li>
+            <a href={`#${e.data.ref}`} class="inline-block border-[1.5px] border-ink bg-paper px-3 py-2 no-underline hover:bg-ink hover:text-paper">
+              {e.data.title}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </PageHero>
+
+  {
+    projects.length > 0 && (
+      <section class="wrap space-y-20 py-16 sm:py-20">
+        {projects.map((e, i) => <ExampleCard entry={e} lang={lang} full index={i} />)}
+      </section>
+    )
+  }
+
+  <section class="wrap space-y-20 py-16 sm:space-y-28 sm:py-24">
+    {scenarios.map((e, i) => <ExampleCard entry={e} lang={lang} full index={i} />)}
+  </section>
+
+  {
+    projects.length === 0 && (
+      <section class="wrap pb-16">
+        <div class="border-2 border-dashed border-grid-strong p-8 text-center">
+          <Rich as="p" class="mono" lang={lang} text={xp.realSoon} />
+        </div>
+      </section>
+    )
+  }
+
+  <CtaBand lang={lang} />
+</Base>

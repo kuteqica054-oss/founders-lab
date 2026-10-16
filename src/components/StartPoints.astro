@@ -1,0 +1,46 @@
+---
+import Icon from './Icon.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const h = t.home.start;
+const svc = Object.fromEntries(t.services.map((s) => [s.id, s.title]));
+// tiny glyphs for each starting point: thought bubble, pencil scribble, cube, stacked parts
+const glyphs = [
+  '<path d="M10 30c-5 0-8-4-6-8 1-3 4-4 6-4 0-6 6-9 11-6 3-4 11-3 12 3 5 0 8 5 5 9-2 4-6 5-9 4-2 3-8 4-11 1-3 2-6 2-8 1Z"/><circle cx="8" cy="38" r="2"/><circle cx="4" cy="44" r="1.2"/>',
+  '<path d="M4 36c6-10 10 6 16-4s8 4 14-6"/><path d="M30 6 42 18 22 38l-14 2 2-14Z"/><path d="m27 9 12 12"/>',
+  '<path d="M24 4 42 14v20L24 44 6 34V14Z"/><path d="M6 14l18 10 18-10M24 24v20"/>',
+  '<path d="M6 34h36v8H6zM10 24h28v10H10zM14 14h20v10H14z"/><path d="M4 42h40"/>',
+];
+---
+
+<ol class="grid gap-0 border-y-2 border-ink md:grid-cols-4">
+  {
+    h.items.map((it, i) => (
+      <li
+        class="group relative flex flex-col border-ink/20 py-7 md:border-l md:px-6 md:first:border-l-0 md:first:pl-0 [&:not(:first-child)]:border-t md:[&:not(:first-child)]:border-t-0"
+        data-reveal
+        style={`--i:${i}`}
+      >
+        <div class="flex items-start justify-between gap-4">
+          <svg viewBox="0 0 48 48" class="h-12 w-12 text-ink" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" set:html={glyphs[i]} />
+          <span class="mono text-sm text-ink-3">{String(i + 1).padStart(2, '0')}/04</span>
+        </div>
+        <h3 class="mt-5 text-2xl">“{it.label}”</h3>
+        <p class="mono mt-4 flex items-center gap-2 text-xs font-medium text-filament-ink">
+          <Icon name="arrowDown" size={14} />
+          {h.weStart}
+        </p>
+        <p class="mt-2 text-ink-2">{it.body}</p>
+        <a href={path('services', lang, it.go)} class="mono mt-auto inline-flex items-center gap-1.5 pt-5 text-sm text-blueprint no-underline hover:underline">
+          {svc[it.go]}
+          <Icon name="arrowRight" size={14} />
+        </a>
+      </li>
+    ))
+  }
+</ol>

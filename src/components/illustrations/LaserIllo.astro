@@ -1,0 +1,38 @@
+---
+/* Laser engraving a logo tag: dashed tool path, burned line growing behind a moving dot. */
+interface Props {
+  title: string;
+  class?: string;
+}
+const { title, class: cls = '' } = Astro.props;
+const tag =
+  'M96 70 H224 A20 20 0 0 1 244 90 V138 A20 20 0 0 1 224 158 H182 L160 180 L138 158 H96 A20 20 0 0 1 76 138 V90 A20 20 0 0 1 96 70 Z';
+---
+
+<svg viewBox="0 0 320 240" class={cls} role="img" aria-label={title}>
+  <title>{title}</title>
+  <!-- plywood plate with grain -->
+  <rect x="34" y="34" width="252" height="176" rx="4" fill="var(--color-paper-deep)" stroke="var(--color-ink)" stroke-width="2"></rect>
+  <g fill="none" stroke="var(--color-grid-strong)" stroke-width="1">
+    <path d="M44 60 C120 52 200 66 276 56"></path>
+    <path d="M44 120 C110 112 210 128 276 118"></path>
+    <path d="M44 190 C130 182 190 196 276 186"></path>
+  </g>
+  <!-- gantry rail -->
+  <path d="M20 22 H300" stroke="var(--color-ink)" stroke-width="2"></path>
+  <path d="M20 16 V28 M300 16 V28" stroke="var(--color-ink)" stroke-width="2"></path>
+  <!-- tool path (planned) -->
+  <path d={tag} pathLength="1" class="laser-trace" fill="none" stroke="var(--color-blueprint)" stroke-width="1.4"></path>
+  <!-- burned line -->
+  <path d={tag} pathLength="1" class="laser-burn" fill="none" stroke="var(--color-ink)" stroke-width="3" stroke-linejoin="round"></path>
+  <!-- engraved raster fill (static) -->
+  <g stroke="var(--color-ink-2)" stroke-width="1.4" opacity="0.7">
+    <path d="M118 102 H202 M118 110 H202 M118 118 H186 M118 126 H170"></path>
+  </g>
+  <circle cx="226" cy="100" r="8" fill="none" stroke="var(--color-ink-2)" stroke-width="1.4"></circle>
+  <!-- laser dot -->
+  <g class="laser-dot" style={`offset-path: path('${tag}')`}>
+    <circle r="9" fill="none" stroke="var(--color-filament)" stroke-width="1.4" opacity="0.6"></circle>
+    <circle r="3.6" fill="var(--color-filament)"></circle>
+  </g>
+</svg>

@@ -1,0 +1,99 @@
+---
+/* Home: five services, five different presentations (not a card grid). */
+import Icon from './Icon.astro';
+import ModelIllo from './illustrations/ModelIllo.astro';
+import PrinterIllo from './illustrations/PrinterIllo.astro';
+import LaserIllo from './illustrations/LaserIllo.astro';
+import LabelIllo from './illustrations/LabelIllo.astro';
+import Rich from './Rich.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const [design, print, laser, pack, graphic] = t.services;
+const out = t.home.services.outputsLabel;
+---
+
+<div class="grid gap-5 lg:grid-cols-12">
+  <!-- 01 design: wide blueprint sheet -->
+  <article class="bg-blueprint relative overflow-hidden p-6 sm:p-8 lg:col-span-7" data-reveal>
+    <div class="flex items-baseline gap-4">
+      <span class="mono text-blueprint-line">{design.no}</span>
+      <h3 class="text-3xl sm:text-4xl">{design.title}</h3>
+    </div>
+    <p class="mt-4 max-w-xl text-blueprint-paper/85">{design.short}</p>
+    <ModelIllo title={design.title} lang={lang} class="mt-6 h-auto w-full" />
+    <div class="mt-6 flex flex-wrap items-end justify-between gap-4">
+      <p class="mono max-w-md text-sm text-blueprint-line">
+        {out}: {design.outputs.slice(0, 3).join(' · ')}
+      </p>
+      <a class="btn btn-light min-h-10 px-4 py-2 text-sm" href={path('services', lang, design.id)}>
+        {t.ui.more} <Icon name="arrowRight" size={16} />
+      </a>
+    </div>
+  </article>
+
+  <!-- 02 print: layered sheet -->
+  <article class="sheet corners flex flex-col p-6 sm:p-8 lg:col-span-5" data-reveal style="--i:1">
+    <div class="flex items-baseline gap-4">
+      <span class="mono text-filament-ink">{print.no}</span>
+      <h3 class="text-3xl">{print.title}</h3>
+    </div>
+    <PrinterIllo title={print.title} class="mx-auto my-6 h-auto w-full max-w-sm" />
+    <p class="text-ink-2">{print.short}</p>
+    <ul class="mono mt-4 space-y-1 text-sm text-ink-2">
+      {print.outputs.map((o) => <li class="flex gap-2"><span class="text-filament-ink">→</span>{o}</li>)}
+    </ul>
+    <a class="link mono mt-auto inline-flex items-center gap-1 pt-6 text-sm" href={path('services', lang, print.id)}>
+      {t.ui.more} <Icon name="arrowRight" size={14} />
+    </a>
+  </article>
+
+  <!-- 03 laser: illustration on the left, text on the right -->
+  <article class="grid gap-6 border-2 border-ink bg-paper p-6 sm:grid-cols-2 sm:p-8 lg:col-span-7" data-reveal>
+    <LaserIllo title={laser.title} class="h-auto w-full" />
+    <div class="flex flex-col">
+      <span class="mono text-filament-ink">{laser.no}</span>
+      <h3 class="mt-2 text-3xl">{laser.title}</h3>
+      <p class="mt-3 text-ink-2">{laser.short}</p>
+      <ul class="mono mt-4 space-y-1 text-sm text-ink-2">
+        {laser.outputs.map((o) => <li class="flex gap-2"><span class="text-filament-ink">→</span>{o}</li>)}
+      </ul>
+      <a class="link mono mt-auto inline-flex items-center gap-1 pt-6 text-sm" href={path('services', lang, laser.id)}>
+        {t.ui.more} <Icon name="arrowRight" size={14} />
+      </a>
+    </div>
+  </article>
+
+  <!-- 04 packaging: compact pointer to the dedicated block + 05 graphics label -->
+  <div class="grid gap-5 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">
+    <article class="bg-filament p-6 text-ink sm:p-7" data-reveal style="--i:1">
+      <div class="flex items-baseline justify-between gap-4">
+        <h3 class="text-2xl sm:text-3xl">{pack.title}</h3>
+        <span class="mono">{pack.no}</span>
+      </div>
+      <p class="mt-3">{pack.short}</p>
+      <a class="mono mt-4 inline-flex items-center gap-1 text-sm font-medium text-ink underline" href="#packaging">
+        {t.home.packaging.title} <Icon name="arrowDown" size={14} />
+      </a>
+    </article>
+    <article class="sheet flex gap-5 p-6 sm:flex-col sm:p-7 lg:flex-row" data-reveal style="--i:2">
+      <LabelIllo title={graphic.title} lang={lang} class="h-auto w-32 shrink-0 sm:w-full lg:w-40" />
+      <div>
+        <span class="mono text-filament-ink">{graphic.no}</span>
+        <h3 class="mt-1 text-2xl">{graphic.title}</h3>
+        <p class="mt-2 text-[0.95rem] text-ink-2">{graphic.short}</p>
+        {graphic.todo && <Rich as="p" class="mt-2 text-sm" lang={lang} text={`[[TODO: ${graphic.todo}]]`} />}
+      </div>
+    </article>
+  </div>
+</div>
+
+<div class="mt-8 flex justify-end">
+  <a class="btn btn-ghost" href={path('services', lang)}>
+    {t.ui.allServices} <Icon name="arrowRight" size={18} />
+  </a>
+</div>

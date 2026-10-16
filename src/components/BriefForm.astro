@@ -1,0 +1,441 @@
+---
+/*
+  Brief form "Projeni anlat / Tell us about your project".
+  Provider is set in site.config.mjs → form.provider:
+   - 'netlify'   : Netlify Forms (detected at deploy from the static HTML; files ≤ 8 MB total)
+   - 'formspree' : posts to https://formspree.io/f/<formspreeId>
+   - 'php'       : posts to /brief.php (generated from src/pages/brief.php.ts), which emails
+                   the brief with attachments to contact.email — for Apache/PHP hosting (Hostinger)
+  Without JS: native validation + regular POST → thank-you page.
+  With JS: custom validation messages, fetch submit, inline thank-you screen.
+*/
+import Rich from './Rich.astro';
+import Icon from './Icon.astro';
+import { useDict, rich, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import config from '../../site.config.mjs';
+interface Props {
+  lang: Lang;
+  idPrefix?: string;
+}
+const { lang, idPrefix = 'bf' } = Astro.props;
+const t = useDict(lang);
+const F = t.form.fields;
+const E = t.form.errors;
+const fc = config.form;
+const isNetlify = fc.provider === 'netlify';
+const isPhp = fc.provider === 'php';
+const action = isNetlify
+  ? path('thanks', lang)
+  : isPhp
+    ? config.contact.email
+      ? '/brief.php'
+      : ''
+    : fc.formspreeId
+      ? `https://formspree.io/f/${fc.formspreeId}`
+      : '';
+const id = (s: string) => `${idPrefix}-${s}`;
+const accept = '.stl,.step,.stp,.obj,.3mf,.svg,.dxf,.ai,.pdf,.jpg,.jpeg,.png';
+const msgs = {
+  required: E.required,
+  email: E.email,
+  phone: E.phone,
+  choice: E.choice,
+  consent: E.consent,
+  fileSize: E.fileSize.replace('{mb}', String(fc.maxTotalMB)),
+  fileType: E.fileType,
+  network: E.network,
+  config: rich(E.config, lang),
+  summary: E.summary,
+  sending: t.form.sending,
+  none: F.files.none,
+};
+const budgetRanges = (fc.budgetRanges ?? []) as { value: string; label: string }[];
+const opt = `<span class="font-normal text-ink-3"> · ${t.form.optional}</span>`;
+const input =
+  'mt-2 block w-full border-[1.5px] border-ink bg-sheet px-3.5 py-3 text-base text-ink placeholder:text-ink-3 focus:outline-3 focus:outline-offset-0 focus:outline-blueprint aria-[invalid=true]:border-filament-ink aria-[invalid=true]:bg-filament-soft/40';
+const lbl = 'mono block text-sm font-medium text-ink';
+const err = 'field-error mono mt-2 hidden text-sm text-filament-ink';
+const thanksHref = path('thanks', lang);
+---
+
+<div class="brief-root" data-brief data-msgs={JSON.stringify(msgs)} data-provider={fc.provider} data-max={fc.maxTotalMB} data-accept={accept}>
+  <form
+    id={id('form')}
+    name={fc.netlifyFormName}
+    method="POST"
+    action={action || thanksHref}
+    enctype="multipart/form-data"
+    class="sheet corners"
+    aria-labelledby={id('title')}
+    data-netlify={isNetlify ? 'true' : undefined}
+    netlify-honeypot={isNetlify ? 'bot-field' : undefined}
+    data-configured={action ? 'true' : 'false'}
+  >
+    <input type="hidden" name="form-name" value={fc.netlifyFormName} />
+    <input type="hidden" name="source-page" value={Astro.url.pathname} />
+    {fc.provider === 'formspree' && <input type="hidden" name="_next" value={config.url + thanksHref} />}
+    <p class="hidden" aria-hidden="true">
+      <label>Bot <input name="bot-field" tabindex="-1" autocomplete="off" /></label>
+    </p>
+
+    <!-- work order header -->
+    <header class="flex flex-wrap items-center justify-between gap-3 border-b-2 border-ink px-5 py-4 sm:px-7">
+      <h2 id={id('title')} class="text-2xl sm:text-3xl">{t.form.title}</h2>
+      <p class="mono text-xs text-ink-3">{t.form.headerNo} · {config.brand.name} · {t.ui.rev} A</p>
+    </header>
+
+    <div class="sr-only" role="alert" aria-live="assertive" data-summary></div>
+    <p class="px-5 pt-5 text-ink-2 sm:px-7">{t.form.lead}</p>
+
+    <!-- 1. you -->
+    <fieldset class="grid gap-5 px-5 pt-6 sm:grid-cols-2 sm:px-7">
+      <legend class="mono float-left w-full text-sm text-filament-ink sm:col-span-2">1 — {t.form.sections.you}</legend>
+      <div>
+        <label class={lbl} for={id('name')}>{F.name.label}</label>
+        <input class={input} id={id('name')} name="name" type="text" autocomplete="name" required placeholder={F.name.placeholder} aria-describedby={id('name-err')} />
+        <p class={err} id={id('name-err')}></p>
+      </div>
+      <div>
+        <label class={lbl} for={id('email')}>{F.email.label}</label>
+        <input class={input} id={id('email')} name="email" type="email" autocomplete="email" inputmode="email" required placeholder={F.email.placeholder} aria-describedby={id('email-err')} />
+        <p class={err} id={id('email-err')}></p>
+      </div>
+      <div>
+        <label class={lbl} for={id('phone')}>{F.phone.label}<Fragment set:html={opt} /></label>
+        <input class={input} id={id('phone')} name="phone" type="tel" autocomplete="tel" inputmode="tel" pattern="[0-9+()\s\-]{7,20}" placeholder={F.phone.placeholder} aria-describedby={`${id('phone-hint')} ${id('phone-err')}`} />
+        <p class="label mt-1.5" id={id('phone-hint')}>{F.phone.hint}</p>
+        <p class={err} id={id('phone-err')}></p>
+      </div>
+      <div>
+        <label class={lbl} for={id('company')}>{F.company.label}<Fragment set:html={opt} /></label>
+        <input class={input} id={id('company')} name="company" type="text" autocomplete="organization" placeholder={F.company.placeholder} />
+      </div>
+    </fieldset>
+
+    <!-- 2. project -->
+    <div class="grid gap-6 px-5 pt-8 sm:px-7">
+      <p class="mono text-sm text-filament-ink">2 — {t.form.sections.project}</p>
+      <fieldset data-group="stage" aria-describedby={id('stage-err')}>
+        <legend class={`${lbl} float-left w-full`}>{F.stage.label}</legend>
+        <div class="clear-left grid grid-cols-2 gap-2 pt-3 lg:grid-cols-4">
+          {
+            F.stage.options.map((o, i) => (
+              <label class="chip">
+                <input type="radio" name="stage" value={o.value} required={i === 0} class="peer sr-only" />
+                <span class="chip-face">{o.label}</span>
+              </label>
+            ))
+          }
+        </div>
+        <p class={err} id={id('stage-err')}></p>
+      </fieldset>
+      <fieldset data-group="needs" data-min="1" aria-describedby={`${id('needs-hint')} ${id('needs-err')}`}>
+        <legend class={`${lbl} float-left w-full`}>{F.needs.label}</legend>
+        <p class="label clear-left pt-1" id={id('needs-hint')}>{F.needs.hint}</p>
+        <div class="clear-left grid grid-cols-2 gap-2 pt-3 lg:grid-cols-5">
+          {
+            F.needs.options.map((o) => (
+              <label class="chip">
+                <input type="checkbox" name="needs[]" value={o.value} class="peer sr-only" />
+                <span class="chip-face">
+                  <Icon name="check" size={16} class="chip-check" />
+                  {o.label}
+                </span>
+              </label>
+            ))
+          }
+        </div>
+        <p class={err} id={id('needs-err')}></p>
+      </fieldset>
+      <div>
+        <label class={lbl} for={id('desc')}>{F.description.label}</label>
+        <textarea class={`${input} min-h-36`} id={id('desc')} name="description" rows="5" required placeholder={F.description.placeholder} aria-describedby={id('desc-err')}></textarea>
+        <p class={err} id={id('desc-err')}></p>
+      </div>
+    </div>
+
+    <!-- 3. details -->
+    <fieldset class="grid gap-5 px-5 pt-8 sm:grid-cols-2 sm:px-7">
+      <legend class="mono float-left w-full text-sm text-filament-ink sm:col-span-2">3 — {t.form.sections.details}</legend>
+      <div>
+        <label class={lbl} for={id('dims')}>{F.dimensions.label}<Fragment set:html={opt} /></label>
+        <input class={input} id={id('dims')} name="dimensions" type="text" placeholder={F.dimensions.placeholder} />
+      </div>
+      <div>
+        <label class={lbl} for={id('qty')}>{F.quantity.label}<Fragment set:html={opt} /></label>
+        <input class={input} id={id('qty')} name="quantity" type="text" placeholder={F.quantity.placeholder} />
+      </div>
+      <div>
+        <label class={lbl} for={id('date')}>{F.date.label}<Fragment set:html={opt} /></label>
+        <input class={input} id={id('date')} name="desired-date" type="date" lang={lang} aria-describedby={id('date-hint')} />
+        <p class="label mt-1.5" id={id('date-hint')}>{F.date.hint}</p>
+      </div>
+      <div>
+        <label class={lbl} for={id('budget')}>{F.budget.label}<Fragment set:html={opt} /></label>
+        {
+          budgetRanges.length ? (
+            <select class={input} id={id('budget')} name="budget">
+              <option value="">{F.budget.choose}</option>
+              {budgetRanges.map((b) => <option value={b.value}>{b.label}</option>)}
+            </select>
+          ) : (
+            <input class={input} id={id('budget')} name="budget" type="text" placeholder={F.budget.placeholder} />
+          )
+        }
+      </div>
+    </fieldset>
+
+    <!-- 4. files -->
+    <fieldset class="px-5 pt-8 sm:px-7" aria-describedby={`${id('files-hint')} ${id('files-err')}`}>
+      <legend class="mono float-left w-full text-sm text-filament-ink">4 — {t.form.sections.files}<Fragment set:html={opt} /></legend>
+      <p class="label clear-left pt-2" id={id('files-hint')}>{F.files.hint.replace('{mb}', String(fc.maxTotalMB))}</p>
+      <div class="clear-left grid gap-2 pt-3 sm:grid-cols-3">
+        {
+          Array.from({ length: fc.fileInputs }, (_, i) => (
+            <label class="file-drop group relative flex cursor-pointer flex-col gap-1 border-[1.5px] border-dashed border-ink bg-paper px-4 py-3 hover:bg-sheet focus-within:outline-3 focus-within:outline-blueprint">
+              <span class="mono flex items-center gap-2 text-sm font-medium">
+                <Icon name="upload" size={16} />
+                {F.files.item.replace('{n}', String(i + 1))}
+              </span>
+              <span class="label truncate" data-file-name>{F.files.none}</span>
+              <input type="file" name={`file${i + 1}`} accept={accept} class="absolute inset-0 cursor-pointer opacity-0" aria-label={`${F.files.label} — ${F.files.item.replace('{n}', String(i + 1))}`} />
+            </label>
+          ))
+        }
+      </div>
+      <p class={err} id={id('files-err')}></p>
+    </fieldset>
+
+    <!-- 5. last -->
+    <div class="grid gap-6 px-5 pt-8 pb-7 sm:px-7">
+      <p class="mono text-sm text-filament-ink">5 — {t.form.sections.last}</p>
+      <fieldset>
+        <legend class={`${lbl} float-left w-full`}>{F.nda.label}<Fragment set:html={opt} /></legend>
+        <div class="clear-left flex flex-wrap gap-2 pt-3">
+          {
+            F.nda.options.map((o) => (
+              <label class="chip">
+                <input type="radio" name="nda" value={o.value} class="peer sr-only" />
+                <span class="chip-face">{o.label}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+      <div>
+        <label class="flex cursor-pointer items-start gap-3">
+          <input type="checkbox" name="consent" value="yes" required id={id('consent')} class="mt-1 h-5 w-5 shrink-0 accent-[var(--color-ink)]" aria-describedby={id('consent-err')} />
+          <span class="text-[0.95rem]" set:html={rich(F.consent.label, lang)} />
+        </label>
+        <p class={err} id={id('consent-err')}></p>
+      </div>
+      <div class="flex flex-wrap items-center gap-4 border-t border-dashed border-ink/40 pt-6">
+        <button type="submit" class="btn btn-primary" data-submit>
+          <span data-submit-label>{t.form.submit}</span>
+          <Icon name="arrowRight" size={18} />
+        </button>
+        <p class="label flex items-center gap-2"><Icon name="lock" size={14} /> {t.form.privacyNote}</p>
+      </div>
+      <p class="mono hidden border-l-4 border-filament-ink bg-filament-soft/50 px-4 py-3 text-sm" role="alert" tabindex="-1" data-form-error></p>
+    </div>
+  </form>
+
+  <!-- inline thank-you screen -->
+  <section class="sheet corners hidden p-6 sm:p-8" data-thanks tabindex="-1" aria-labelledby={id('thanks-title')}>
+    <p class="mono text-sm text-filament-ink">✓ {t.thanks.kicker}</p>
+    <h2 id={id('thanks-title')} class="mt-3 text-3xl sm:text-4xl">{t.thanks.title}</h2>
+    <p class="mt-3 text-ink-2">{t.thanks.lead}</p>
+    <ol class="mt-6 grid gap-4 sm:grid-cols-3">
+      {
+        t.thanks.steps.map((s, i) => (
+          <li class="border-t-2 border-ink pt-3">
+            <span class="mono text-sm text-ink-3">0{i + 1}</span>
+            <h3 class="mt-1 text-xl">{s.title}</h3>
+            <Rich as="p" class="mt-1 text-[0.95rem] text-ink-2" lang={lang} text={s.body} />
+          </li>
+        ))
+      }
+    </ol>
+    <p class="label mt-6">{t.thanks.nda}</p>
+    <button type="button" class="btn btn-ghost mt-6" data-again>{t.thanks.again}</button>
+  </section>
+</div>
+
+<style>
+  .chip {
+    position: relative;
+    display: block;
+    cursor: pointer;
+  }
+  .chip-face {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 3rem;
+    height: 100%;
+    padding: 0.6rem 0.85rem;
+    border: 1.5px solid var(--color-ink);
+    background: var(--color-paper);
+    font-family: var(--font-mono);
+    font-size: 0.88rem;
+    line-height: 1.25;
+    transition: background-color 0.12s ease;
+  }
+  .chip:hover .chip-face {
+    background: var(--color-sheet);
+  }
+  .chip :global(.chip-check) {
+    display: none;
+    flex-shrink: 0;
+  }
+  .chip input:checked + .chip-face {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+  .chip input:checked + .chip-face :global(.chip-check) {
+    display: block;
+    color: var(--color-filament);
+  }
+  .chip input:focus-visible + .chip-face {
+    outline: 3px solid var(--color-blueprint);
+    outline-offset: 2px;
+  }
+  [data-group][aria-invalid='true'] .chip-face {
+    border-color: var(--color-filament-ink);
+  }
+</style>
+
+<script>
+  type Msgs = Record<string, string>;
+  document.querySelectorAll<HTMLElement>('[data-brief]').forEach((root) => {
+    const form = root.querySelector('form')!;
+    const thanks = root.querySelector<HTMLElement>('[data-thanks]')!;
+    const msgs: Msgs = JSON.parse(root.dataset.msgs || '{}');
+    const maxBytes = Number(root.dataset.max || 8) * 1024 * 1024;
+    const exts = (root.dataset.accept || '').split(',');
+    const formError = root.querySelector<HTMLElement>('[data-form-error]')!;
+    const summary = root.querySelector<HTMLElement>('[data-summary]')!;
+    const submitBtn = root.querySelector<HTMLButtonElement>('[data-submit]')!;
+    const submitLabel = root.querySelector<HTMLElement>('[data-submit-label]')!;
+    const defaultLabel = submitLabel.textContent;
+    let tried = false;
+    form.noValidate = true;
+
+    const errEl = (el: Element) => {
+      const ids = (el.getAttribute('aria-describedby') || '').split(' ');
+      return ids.map((i) => document.getElementById(i)).find((n) => n?.classList.contains('field-error')) || null;
+    };
+    const setErr = (el: HTMLElement, msg: string) => {
+      const e = errEl(el);
+      el.setAttribute('aria-invalid', msg ? 'true' : 'false');
+      if (e) {
+        e.textContent = msg;
+        e.classList.toggle('hidden', !msg);
+      }
+      return !msg;
+    };
+
+    const checkField = (el: HTMLInputElement | HTMLTextAreaElement) => {
+      const v = el.value.trim();
+      if (el.type === 'checkbox') return setErr(el, el.required && !(el as HTMLInputElement).checked ? msgs.consent : '');
+      if (el.required && !v) return setErr(el, msgs.required);
+      if (el.type === 'email' && v && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)) return setErr(el, msgs.email);
+      if (el.type === 'tel' && v && !/^[0-9+()\s-]{7,20}$/.test(v)) return setErr(el, msgs.phone);
+      return setErr(el, '');
+    };
+    const checkGroup = (fs: HTMLFieldSetElement) => {
+      const any = fs.querySelectorAll('input:checked').length > 0;
+      return setErr(fs, any ? '' : fs.dataset.group === 'needs' ? msgs.choice : msgs.required);
+    };
+    const fileInputs = [...form.querySelectorAll<HTMLInputElement>('input[type=file]')];
+    const filesFs = fileInputs[0]?.closest('fieldset') as HTMLFieldSetElement | null;
+    const checkFiles = () => {
+      if (!filesFs) return true;
+      let total = 0;
+      for (const fi of fileInputs) {
+        for (const file of Array.from(fi.files || [])) {
+          total += file.size;
+          const ext = '.' + (file.name.split('.').pop() || '').toLowerCase();
+          if (!exts.includes(ext)) return setErr(filesFs, msgs.fileType.replace('{name}', file.name));
+        }
+      }
+      return setErr(filesFs, total > maxBytes ? msgs.fileSize : '');
+    };
+
+    fileInputs.forEach((fi) =>
+      fi.addEventListener('change', () => {
+        const name = fi.closest('label')?.querySelector('[data-file-name]');
+        if (name) name.textContent = fi.files?.[0]?.name || msgs.none;
+        checkFiles();
+      }),
+    );
+
+    const fields = [...new Set(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[required]:not([type=radio]), textarea[required], input[type=email], input[type=tel]'))];
+    const groups = [...form.querySelectorAll<HTMLFieldSetElement>('fieldset[data-group]')];
+    fields.forEach((el) => el.addEventListener(el.type === 'checkbox' ? 'change' : 'blur', () => tried && checkField(el)));
+    groups.forEach((fs) => fs.addEventListener('change', () => tried && checkGroup(fs)));
+
+    const validate = () => {
+      const bad: HTMLElement[] = [];
+      fields.forEach((el) => !checkField(el) && bad.push(el));
+      groups.forEach((fs) => !checkGroup(fs) && bad.push(fs.querySelector('input') as HTMLElement));
+      if (!checkFiles() && filesFs) bad.push(fileInputs[0]);
+      return bad;
+    };
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      tried = true;
+      formError.classList.add('hidden');
+      const bad = validate();
+      if (bad.length) {
+        summary.textContent = msgs.summary.replace('{n}', String(bad.length));
+        // keep DOM order for focus
+        bad.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+        bad[0].focus();
+        return;
+      }
+      if (form.dataset.configured !== 'true') {
+        formError.innerHTML = msgs.config;
+        formError.classList.remove('hidden');
+        return;
+      }
+      submitBtn.disabled = true;
+      submitLabel.textContent = msgs.sending;
+      try {
+        const data = new FormData(form);
+        const isNetlify = root.dataset.provider === 'netlify';
+        const res = await fetch(isNetlify ? '/' : form.action, {
+          method: 'POST',
+          body: data,
+          headers: isNetlify ? undefined : { Accept: 'application/json' },
+        });
+        if (!res.ok) throw new Error(String(res.status));
+        form.reset();
+        form.classList.add('hidden');
+        thanks.classList.remove('hidden');
+        thanks.focus();
+        thanks.scrollIntoView({ block: 'start' });
+      } catch {
+        formError.textContent = msgs.network;
+        formError.classList.remove('hidden');
+        formError.focus?.();
+      } finally {
+        submitBtn.disabled = false;
+        submitLabel.textContent = defaultLabel;
+      }
+    });
+
+    root.querySelector('[data-again]')?.addEventListener('click', () => {
+      thanks.classList.add('hidden');
+      form.classList.remove('hidden');
+      fileInputs.forEach((fi) => {
+        const name = fi.closest('label')?.querySelector('[data-file-name]');
+        if (name) name.textContent = msgs.none;
+      });
+      tried = false;
+      (form.querySelector('input:not([type=hidden])') as HTMLElement)?.focus();
+    });
+  });
+</script>

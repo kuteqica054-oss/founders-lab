@@ -1,0 +1,131 @@
+---
+import Wordmark from './Wordmark.astro';
+import Icon from './Icon.astro';
+import WhatsAppButton from './WhatsAppButton.astro';
+import { useDict, todoChip, type Lang, type RouteKey } from '../i18n';
+import { path } from '../i18n/routes';
+import { fmt } from '../lib/format';
+import config from '../../site.config.mjs';
+import { cityLine, fullAddress, telHref, socialLinks } from '../lib/contact';
+interface Props {
+  lang: Lang;
+  page: RouteKey;
+}
+const { lang, page } = Astro.props;
+const t = useDict(lang);
+const f = fmt(lang);
+const c = config.contact;
+const socials = socialLinks;
+const val = (v: string, note: string) => (v ? v : todoChip(note));
+---
+
+<footer class="bg-ink text-paper">
+  <div class="wrap pt-14 pb-8">
+    <div class="grid gap-10 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <a href={path('home', lang)} class="text-paper no-underline"><Wordmark size="lg" /></a>
+        <p class="mt-5 max-w-sm text-paper/75">{t.footer.pitch}</p>
+        <div class="mt-6 flex flex-wrap items-center gap-3">
+          <a href={path('contact', lang)} class="btn btn-primary">{t.ui.cta} <Icon name="arrowRight" size={18} /></a>
+          <WhatsAppButton lang={lang} tone="dark" />
+        </div>
+      </div>
+
+      <nav class="lg:col-span-2" aria-labelledby="ft-pages">
+        <h2 id="ft-pages" class="mono mb-4 text-sm font-medium text-filament">{t.footer.sections}</h2>
+        <ul class="space-y-2">
+          {
+            t.nav.map((n) => (
+              <li>
+                <a href={path(n.key as RouteKey, lang)} class="text-paper/85 no-underline hover:text-paper hover:underline">
+                  {n.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="lg:col-span-3">
+        <h2 class="mono mb-4 text-sm font-medium text-filament">{t.footer.contact}</h2>
+        <ul class="space-y-3 text-paper/85">
+          <li class="flex gap-3">
+            <Icon name="mail" class="mt-1 shrink-0" />
+            {c.email ? <a class="text-paper" href={`mailto:${c.email}`}>{c.email}</a> : <span set:html={todoChip('email')} />}
+          </li>
+          <li class="flex gap-3">
+            <Icon name="phone" class="mt-1 shrink-0" />
+            {c.phone ? <a class="text-paper" href={telHref(c.phone)}>{c.phone}</a> : <span set:html={todoChip('phone')} />}
+          </li>
+          <li class="flex gap-3">
+            <Icon name="pin" class="mt-1 shrink-0" />
+            <address class="not-italic">
+              {fullAddress || cityLine}
+              {!fullAddress && <span class="block pt-1" set:html={todoChip('street address')} />}
+            </address>
+          </li>
+        </ul>
+        <h2 class="mono mt-8 mb-3 text-sm font-medium text-filament">{t.footer.social}</h2>
+        <ul class="flex gap-2">
+          {
+            socials.map((s) => (
+              <li>
+                <a
+                  href={s.href || '#'}
+                  class="grid h-11 w-11 place-items-center border border-paper/30 text-paper hover:border-filament hover:text-filament"
+                  aria-label={s.label + (s.href ? '' : ' (TODO)')}
+                  data-todo={s.href ? undefined : ''}
+                  rel={s.href ? 'me noopener' : undefined}
+                  target={s.href ? '_blank' : undefined}
+                >
+                  <Icon name={s.icon} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <!-- Drawing title block -->
+      <div class="lg:col-span-3">
+        <table class="mono w-full border-collapse text-[0.78rem] text-paper/80">
+          <caption class="sr-only">{t.footer.legal}</caption>
+          <tbody>
+            <tr>
+              <th scope="row" class="w-1/3 border border-paper/30 px-2 py-1.5 text-left font-normal text-paper/55">{t.footer.titleBlock.project}</th>
+              <td class="border border-paper/30 px-2 py-1.5">{t.footer.titleBlock.projectValue}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="border border-paper/30 px-2 py-1.5 text-left font-normal text-paper/55">{t.footer.titleBlock.material}</th>
+              <td class="border border-paper/30 px-2 py-1.5">{t.footer.titleBlock.materialValue}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="border border-paper/30 px-2 py-1.5 text-left font-normal text-paper/55">{t.footer.titleBlock.tolerance}</th>
+              <td class="border border-paper/30 px-2 py-1.5">{t.footer.titleBlock.toleranceValue}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="border border-paper/30 px-2 py-1.5 text-left font-normal text-paper/55">{t.footer.entity}</th>
+              <td class="border border-paper/30 px-2 py-1.5" set:html={val(config.legal.entity, 'legal entity')} />
+            </tr>
+            <tr>
+              <th scope="row" class="border border-paper/30 px-2 py-1.5 text-left font-normal text-paper/55">{t.footer.location}</th>
+              <td class="border border-paper/30 px-2 py-1.5">{cityLine}</td>
+            </tr>
+            <tr>
+              <th scope="row" class="border border-paper/30 px-2 py-1.5 text-left font-normal text-paper/55">{t.ui.scale}</th>
+              <td class="border border-paper/30 px-2 py-1.5">1:1 · {t.ui.rev} {f.year()}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-col gap-5 border-t border-paper/20 pt-6 text-sm text-paper/65 md:flex-row md:items-center md:justify-between">
+      <p>© {f.year()} {config.brand.name}. {t.footer.rights} <span class="hidden sm:inline">· {t.footer.madeIn}</span></p>
+      <ul class="flex flex-wrap items-center gap-x-5 gap-y-2">
+        <li><a class="text-paper/80 hover:text-paper" href={path('privacy', lang)}>{t.footer.privacy}</a></li>
+        <li><a class="text-paper/80 hover:text-paper" href={path('terms', lang)}>{t.footer.terms}</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>

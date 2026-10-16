@@ -1,0 +1,13 @@
+---
+import { rich, type Lang } from '../i18n';
+interface Props {
+  text: string;
+  lang: Lang;
+  as?: string;
+  class?: string;
+}
+const { text, lang, as = 'span', class: cls } = Astro.props;
+const Tag = as as any;
+---
+
+<Tag class={cls} set:html={rich(text, lang)} />

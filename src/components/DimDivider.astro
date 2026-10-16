@@ -1,0 +1,20 @@
+---
+/* Dimension line used as a section divider: |←—— label ——→| */
+interface Props {
+  label?: string;
+  tone?: 'ink' | 'blueprint' | 'light';
+  class?: string;
+}
+const { label, tone = 'blueprint', class: cls = '' } = Astro.props;
+const color = tone === 'ink' ? 'text-ink-3' : tone === 'light' ? 'text-blueprint-line' : 'text-blueprint';
+---
+
+<div class:list={['flex items-center gap-0', color, cls]} aria-hidden="true">
+  <span class="h-5 w-px bg-current"></span>
+  <svg width="10" height="10" viewBox="0 0 10 10" class="-ml-px shrink-0"><path d="M0 5 10 1v8Z" fill="currentColor"></path></svg>
+  <span class="h-px flex-1 bg-current"></span>
+  {label && <span class="mono px-3 text-xs">{label}</span>}
+  <span class="h-px flex-1 bg-current"></span>
+  <svg width="10" height="10" viewBox="0 0 10 10" class="-mr-px shrink-0"><path d="M10 5 0 1v8Z" fill="currentColor"></path></svg>
+  <span class="h-5 w-px bg-current"></span>
+</div>

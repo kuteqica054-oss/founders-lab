@@ -1,0 +1,35 @@
+---
+/* Six price drivers, each with a "less ↔ more" gauge drawn like a slider on a control panel. */
+import { useDict, type Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  detailed?: boolean;
+}
+const { lang, detailed = false } = Astro.props;
+const t = useDict(lang);
+const lm = t.pricingPage.lessMore;
+---
+
+<ol class="grid border-t-2 border-l-2 border-ink sm:grid-cols-2 lg:grid-cols-3">
+  {
+    t.pricingFactors.map((f, i) => (
+      <li class="flex flex-col border-r-2 border-b-2 border-ink bg-paper p-5 sm:p-6" data-reveal style={`--i:${i % 3}`}>
+        <div class="flex items-baseline justify-between gap-3">
+          <h3 class="text-2xl">{f.title}</h3>
+          <span class="mono text-sm text-ink-3">f{i + 1}</span>
+        </div>
+        <p class:list={['mt-3 text-ink-2', detailed ? '' : 'text-[0.95rem]']}>{f.body}</p>
+        <div class="mt-auto pt-5" aria-hidden="true">
+          <div class="relative h-6">
+            <div class="bg-layers absolute inset-x-0 top-2 h-2 border border-ink" />
+            <div class="absolute top-0 h-6 w-1.5 bg-filament outline-2 outline-ink" style={`left:${18 + i * 11}%`} />
+          </div>
+        </div>
+        <div class="mono mt-2 flex justify-between gap-3 text-xs text-ink-3">
+          <span><span class="sr-only">{lm[0]}: </span>{f.low}</span>
+          <span class="text-right"><span class="sr-only">{lm[1]}: </span>{f.high}</span>
+        </div>
+      </li>
+    ))
+  }
+</ol>

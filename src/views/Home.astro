@@ -1,0 +1,197 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import SectionHead from '../components/SectionHead.astro';
+import HeroDrawing from '../components/illustrations/HeroDrawing.astro';
+import DielineIllo from '../components/illustrations/DielineIllo.astro';
+import StartPoints from '../components/StartPoints.astro';
+import ServicesShowcase from '../components/ServicesShowcase.astro';
+import Timeline from '../components/Timeline.astro';
+import IterationRow from '../components/IterationRow.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+import PartnersNote from '../components/PartnersNote.astro';
+import PricingFactors from '../components/PricingFactors.astro';
+import Safety from '../components/Safety.astro';
+import Faq from '../components/Faq.astro';
+import BriefForm from '../components/BriefForm.astro';
+import ExampleCard from '../components/ExampleCard.astro';
+import DimDivider from '../components/DimDivider.astro';
+import Icon from '../components/Icon.astro';
+import Rich from '../components/Rich.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { faqLd } from '../lib/schema';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const h = t.home;
+const eq = t.equipmentSpecs;
+const examples = (await getCollection('examples', (e) => e.data.lang === lang && e.data.featured)).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+
+<Base lang={lang} page="home" jsonLd={[faqLd(lang)]}>
+  <!-- 1 · HERO -->
+  <section class="bg-mm relative overflow-hidden border-b-2 border-ink">
+    <div class="wrap grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-12 lg:gap-6 lg:py-20">
+      <div class="lg:col-span-6">
+        <p class="mono mb-6 inline-flex items-center gap-2 border-[1.5px] border-ink bg-paper px-2.5 py-1 text-[0.8rem]">
+          <span class="h-2 w-2 bg-filament" aria-hidden="true"></span>
+          {h.hero.kicker}
+        </p>
+        <h1 class="text-[2.65rem] leading-[0.98] sm:text-6xl lg:text-[clamp(3.2rem,4.7vw,4.9rem)]">
+          <span class="block">{h.hero.titleA}</span>
+          <span class="hero-mark">{h.hero.titleB}</span>
+          <span> {h.hero.titleC}</span>
+        </h1>
+        <p class="mt-6 max-w-xl text-lg text-ink-2 sm:text-xl">{h.hero.lead}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#brief" class="btn btn-primary">{t.ui.cta} <Icon name="arrowRight" size={18} /></a>
+          <a href="#process" class="btn btn-ghost bg-paper">{t.ui.howItWorks}</a>
+        </div>
+        <ul class="mono mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-2">
+          {
+            h.hero.chips.map((c) => (
+              <li class="flex items-center gap-2">
+                <Icon name="check" size={16} class="text-filament-ink" />
+                {c}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <div class="lg:col-span-6">
+        <HeroDrawing lang={lang} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 · STARTING POINTS -->
+  <section id="start" class="wrap py-16 sm:py-24" aria-labelledby="h-start">
+    <SectionHead lang={lang} no="01" kicker={h.start.kicker} title={h.start.title} lead={h.start.lead} id="h-start" />
+    <div class="mt-10"><StartPoints lang={lang} /></div>
+  </section>
+
+  <!-- 3 · SERVICES -->
+  <section id="services" class="wrap pb-16 sm:pb-24" aria-labelledby="h-services">
+    <DimDivider label="1:1" class="mb-14" />
+    <SectionHead lang={lang} no="02" kicker={h.services.kicker} title={h.services.title} lead={h.services.lead} id="h-services" />
+    <div class="mt-10"><ServicesShowcase lang={lang} /></div>
+  </section>
+
+  <!-- 4 · PROCESS -->
+  <section id="process" class="bg-mm-soft border-y-2 border-ink" aria-labelledby="h-process">
+    <div class="wrap py-16 sm:py-24">
+      <div class="flex flex-wrap items-end justify-between gap-6">
+        <SectionHead lang={lang} no="03" kicker={h.process.kicker} title={h.process.title} lead={h.process.lead} id="h-process" />
+        <p class="sticky-note max-w-xs rotate-1" set:html={`<span>${h.process.revisions}</span>`.replace(/\[\[TODO\]\]/, '<span class="todo-chip">TODO</span>')} />
+      </div>
+      <div class="mt-12"><Timeline lang={lang} /></div>
+      <a class="btn btn-ghost mt-12 bg-paper" href={path('process', lang)}>{t.ui.allSteps} <Icon name="arrowRight" size={18} /></a>
+    </div>
+  </section>
+
+  <!-- 5 · ITERATIONS -->
+  <section id="iterations" class="wrap py-16 sm:py-24" aria-labelledby="h-iter">
+    <SectionHead lang={lang} no="04" kicker={t.iterations.kicker} title={t.iterations.title} lead={t.iterations.lead} id="h-iter" />
+    <div class="mt-10"><IterationRow lang={lang} /></div>
+  </section>
+
+  <!-- 6 · EQUIPMENT -->
+  <section id="equipment" class="bg-paper-deep border-y-2 border-ink" aria-labelledby="h-equip">
+    <div class="wrap py-16 sm:py-24">
+      <SectionHead lang={lang} no="05" kicker={h.equipment.kicker} title={h.equipment.title} lead={h.equipment.lead} id="h-equip" />
+      <div class="mt-10 grid gap-6 lg:grid-cols-2">
+        <SpecSheet lang={lang} no="EQ-01" title={eq.print.title} can={eq.print.can} rows={eq.print.rows} canLabel={h.equipment.canLabel} specLabel={h.equipment.specLabel} />
+        <SpecSheet lang={lang} no="EQ-02" title={eq.laser.title} can={eq.laser.can} rows={eq.laser.rows} canLabel={h.equipment.canLabel} specLabel={h.equipment.specLabel} />
+      </div>
+      <div class="mt-6"><PartnersNote lang={lang} /></div>
+      <a class="btn btn-ghost mt-10 bg-paper" href={path('equipment', lang)}>{t.ui.allEquipment} <Icon name="arrowRight" size={18} /></a>
+    </div>
+  </section>
+
+  <!-- 7 · PACKAGING -->
+  <section id="packaging" class="bg-blueprint" aria-labelledby="h-pack">
+    <div class="wrap grid gap-12 py-16 sm:py-24 lg:grid-cols-12">
+      <div class="lg:col-span-5">
+        <SectionHead lang={lang} no="06" kicker={h.packaging.kicker} title={h.packaging.title} lead={h.packaging.lead} id="h-pack" tone="blueprint" />
+        <ol class="mt-10 space-y-6">
+          {
+            h.packaging.points.map((p, i) => (
+              <li class="grid grid-cols-[2.5rem_1fr] gap-3" data-reveal style={`--i:${i}`}>
+                <span class="mono text-blueprint-line">{String.fromCharCode(65 + i)}</span>
+                <div>
+                  <h3 class="text-xl">{p.title}</h3>
+                  <p class="mt-1 text-blueprint-paper/80">{p.body}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+        <Rich as="p" lang={lang} text={h.packaging.partner} class="mono mt-8 border-t border-blueprint-line/40 pt-4 text-sm text-blueprint-line" />
+      </div>
+      <div class="lg:col-span-7 lg:pt-16">
+        <DielineIllo title={h.packaging.drawingTitle} legend={h.packaging.legend} tone="blueprint" class="h-auto w-full" />
+        <a class="btn btn-light mt-8" href={path('services', lang, 'packaging')}>{t.services[3].title} <Icon name="arrowRight" size={18} /></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · EXAMPLES -->
+  <section id="examples" class="wrap py-16 sm:py-24" aria-labelledby="h-ex">
+    <SectionHead lang={lang} no="07" kicker={h.examples.kicker} title={h.examples.title} lead={h.examples.lead} id="h-ex" />
+    <div class="mt-12 grid gap-10 md:grid-cols-3 md:gap-6">
+      {examples.slice(0, 3).map((e, i) => <ExampleCard entry={e} lang={lang} index={i} />)}
+    </div>
+    <a class="btn btn-ghost mt-12" href={path('examples', lang)}>{t.ui.allExamples} <Icon name="arrowRight" size={18} /></a>
+  </section>
+
+  <!-- 9 · PRICING -->
+  <section id="pricing" class="bg-paper-deep border-y-2 border-ink" aria-labelledby="h-price">
+    <div class="wrap py-16 sm:py-24">
+      <SectionHead lang={lang} no="08" kicker={h.pricing.kicker} title={h.pricing.title} lead={h.pricing.lead} id="h-price" />
+      <p class="mono mt-8 inline-block max-w-full border-[1.5px] border-ink bg-paper px-4 py-3 text-sm break-words sm:text-base">{h.pricing.formula}</p>
+      <div class="mt-10"><PricingFactors lang={lang} /></div>
+      <a class="btn btn-ghost mt-10 bg-paper" href={path('pricing', lang)}>{t.ui.pricingMore} <Icon name="arrowRight" size={18} /></a>
+    </div>
+  </section>
+
+  <!-- 10 · TRUST -->
+  <section id="trust" class="bg-ink text-paper" aria-labelledby="h-trust">
+    <div class="wrap grid gap-12 py-16 sm:py-20 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHead lang={lang} no="09" kicker={h.safety.kicker} title={h.safety.title} lead={h.safety.lead} id="h-trust" tone="blueprint" />
+      </div>
+      <div class="lg:col-span-8 lg:pt-14"><Safety lang={lang} /></div>
+    </div>
+  </section>
+
+  <!-- 11 · FAQ -->
+  <section id="faq" class="wrap grid gap-10 py-16 sm:py-24 lg:grid-cols-12" aria-labelledby="h-faq">
+    <div class="lg:col-span-4">
+      <SectionHead lang={lang} no="10" kicker={h.faq.kicker} title={h.faq.title} lead={h.faq.lead} id="h-faq" />
+    </div>
+    <div class="lg:col-span-8"><Faq lang={lang} /></div>
+  </section>
+
+  <!-- 12 · BRIEF -->
+  <section id="brief" class="bg-mm border-t-2 border-ink" aria-labelledby="h-brief">
+    <div class="wrap grid gap-10 py-16 sm:py-24 lg:grid-cols-12">
+      <div class="lg:col-span-4">
+        <SectionHead lang={lang} no="11" kicker={h.brief.kicker} title={h.brief.title} lead={h.brief.lead} id="h-brief" />
+      </div>
+      <div class="lg:col-span-8"><BriefForm lang={lang} idPrefix="home" /></div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero-mark {
+    background-image: linear-gradient(transparent 66%, var(--color-filament) 66% 90%, transparent 90%);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+</style>

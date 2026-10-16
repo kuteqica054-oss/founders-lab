@@ -1,0 +1,53 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { useDict, rich, todoChip, type Lang } from '../i18n';
+import { legal } from '../i18n/legal';
+import { fmt } from '../lib/format';
+import config from '../../site.config.mjs';
+import { cityLine, fullAddress } from '../lib/contact';
+interface Props {
+  lang: Lang;
+  doc: 'privacy' | 'terms';
+}
+const { lang, doc } = Astro.props;
+const t = useDict(lang);
+const d = legal[doc][lang];
+const f = fmt(lang);
+const fill = (s: string) =>
+  rich(s, lang)
+    .replace(/\{entity\}/g, config.legal.entity || config.brand.name + ' ' + todoChip('legal entity'))
+    .replace(/\{address\}/g, fullAddress || `${cityLine} ${todoChip('street address')}`)
+    .replace(/\{privacyEmail\}/g, config.legal.privacyEmail || config.contact.email || todoChip('email'))
+    .replace(/\{state\}/g, config.legal.governingState)
+    .replace(/\{venue\}/g, config.legal.venue || todoChip('courts / venue'));
+---
+
+<Base lang={lang} page={doc}>
+  <PageHero lang={lang} page={doc} kicker={d.title} title={d.title} sheet={doc === 'privacy' ? 9 : 10}>
+    <p class="mt-6 inline-flex flex-wrap items-center gap-3">
+      <span class="sticky-note -rotate-1 py-2 font-medium">{t.ui.draft}</span>
+      <span class="label">{t.ui.lastUpdated}: {f.date(config.legal.updated)}</span>
+    </p>
+  </PageHero>
+  <article class="wrap py-14 sm:py-20">
+    <div class="prose-lab max-w-3xl">
+      <p class="text-lg" set:html={fill(d.intro)} />
+      {
+        d.sections.map((s) => (
+          <section>
+            <h2>{s.h}</h2>
+            {s.p?.map((p) => <p set:html={fill(p)} />)}
+            {s.ul && (
+              <ul>
+                {s.ul.map((li) => (
+                  <li set:html={fill(li)} />
+                ))}
+              </ul>
+            )}
+          </section>
+        ))
+      }
+    </div>
+  </article>
+</Base>

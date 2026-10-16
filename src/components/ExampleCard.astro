@@ -1,0 +1,86 @@
+---
+/* Example scenario / project as a "project folder". Compact on home, full on /ornekler. */
+import type { CollectionEntry } from 'astro:content';
+import { Image } from 'astro:assets';
+import ExampleIllo from './illustrations/ExampleIllo.astro';
+import { useDict, type Lang } from '../i18n';
+interface Props {
+  entry: CollectionEntry<'examples'>;
+  lang: Lang;
+  full?: boolean;
+  index?: number;
+}
+const { entry, lang, full = false, index = 0 } = Astro.props;
+const d = entry.data;
+const t = useDict(lang);
+const svcTitle = Object.fromEntries(t.services.map((s) => [s.id, s.title]));
+const isScenario = d.kind === 'scenario';
+const ep = t.examplesPage;
+---
+
+<article id={d.ref} class:list={['relative flex flex-col', full ? 'lg:grid lg:grid-cols-12 lg:gap-10' : '']} data-reveal style={`--i:${index}`}>
+  <!-- folder tab -->
+  <div class:list={[full ? 'lg:col-span-5' : '']}>
+    <div class="flex items-end gap-0">
+      <span class="mono inline-block border-x-2 border-t-2 border-ink bg-sticky px-3 py-1 text-xs font-medium">
+        {isScenario ? t.ui.scenario : t.ui.project}
+      </span>
+      <span class="h-0.5 flex-1 bg-ink"></span>
+    </div>
+    <div class="border-2 border-t-0 border-ink bg-sheet p-4">
+      {
+        d.cover ? (
+          <Image src={d.cover} alt={d.coverAlt ?? d.title} widths={[480, 800, 1200]} sizes="(min-width:1024px) 40vw, 100vw" class="aspect-[3/2] w-full object-cover" />
+        ) : (
+          <div class="bg-mm-soft">
+            <ExampleIllo kind={d.illustration} title={d.title} class="h-auto w-full" />
+          </div>
+        )
+      }
+      {isScenario && <p class="label mt-2">{t.ui.illustrative}</p>}
+    </div>
+  </div>
+
+  <div class:list={['flex flex-1 flex-col pt-5', full ? 'lg:col-span-7 lg:pt-10' : '']}>
+    <h3 class:list={[full ? 'text-3xl sm:text-4xl' : 'text-2xl']}>{d.title}</h3>
+    <p class="mt-3 text-ink-2">{d.summary}</p>
+
+    {
+      full ? (
+        <dl class="mt-6 grid gap-5">
+          <div>
+            <dt class="mono text-sm font-medium text-filament-ink">{ep.input}</dt>
+            <dd class="mt-1">{d.input}</dd>
+          </div>
+          <div>
+            <dt class="mono text-sm font-medium text-filament-ink">{ep.iterations}</dt>
+            <dd>
+              <ol class="mt-2 space-y-3 border-l-2 border-ink pl-5">
+                {d.iterations.map((it) => (
+                  <li class="relative">
+                    <span class="mono absolute top-0.5 -left-[2.15rem] grid h-6 w-6 place-items-center border-2 border-ink bg-paper text-[0.65rem]">{it.v}</span>
+                    {it.note}
+                  </li>
+                ))}
+              </ol>
+            </dd>
+          </div>
+          <div>
+            <dt class="mono text-sm font-medium text-filament-ink">{ep.result}</dt>
+            <dd class="mt-1">{d.result}</dd>
+          </div>
+          <div>
+            <dt class="mono text-sm font-medium text-filament-ink">{ep.services}</dt>
+            <dd class="mono mt-2 flex flex-wrap gap-2 text-xs">
+              {d.services.map((s) => <span class="border border-ink/40 px-2 py-1">{svcTitle[s]}</span>)}
+            </dd>
+          </div>
+        </dl>
+      ) : (
+        <p class="mono mt-4 text-sm text-ink-3">
+          {d.iterations.map((i) => i.v).join(' → ')} → {t.iterations.items[3].v}
+        </p>
+      )
+    }
+  </div>
+</article>

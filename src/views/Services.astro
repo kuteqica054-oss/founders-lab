@@ -1,0 +1,122 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import ModelIllo from '../components/illustrations/ModelIllo.astro';
+import PrinterIllo from '../components/illustrations/PrinterIllo.astro';
+import LaserIllo from '../components/illustrations/LaserIllo.astro';
+import DielineIllo from '../components/illustrations/DielineIllo.astro';
+import LabelIllo from '../components/illustrations/LabelIllo.astro';
+import PhotoSlot from '../components/PhotoSlot.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Rich from '../components/Rich.astro';
+import Icon from '../components/Icon.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { servicesLd, breadcrumbLd } from '../lib/schema';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const sp = t.servicesPage;
+const phases: Record<string, string> = sp.servicePhases;
+const photos: Record<string, { note: string; size: string }> = {
+  design: { note: 'Sketches on the desk, 3D model on screen', size: '1600 × 1200 px' },
+  '3d-printing': { note: 'Printer at work, layer lines visible (macro)', size: '1600 × 1200 px' },
+  laser: { note: 'Engraving macro: logo on wood', size: '1600 × 1200 px' },
+  packaging: { note: 'Box and insert with the product in place', size: '1600 × 1200 px' },
+  graphics: { note: 'Labeled product close-up', size: '1600 × 1200 px' },
+};
+---
+
+<Base
+  lang={lang}
+  page="services"
+  jsonLd={[servicesLd(lang), breadcrumbLd(lang, [{ name: t.nav[0].label, path: path('services', lang) }])]}
+>
+  <PageHero lang={lang} page="services" kicker={sp.kicker} title={sp.title} lead={sp.lead} sheet={2}>
+    <nav aria-label={t.ui.onThisPage} class="mt-10">
+      <ol class="mono flex flex-wrap gap-2 text-sm">
+        {
+          t.services.map((s) => (
+            <li>
+              <a href={`#${s.id}`} class="inline-flex items-center gap-2 border-[1.5px] border-ink bg-paper px-3 py-2 no-underline hover:bg-ink hover:text-paper">
+                <span class="text-filament-ink">{s.no}</span> {s.title}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+    </nav>
+  </PageHero>
+
+  {
+    t.services.map((s, i) => {
+      const flip = i % 2 === 1;
+      return (
+        <section id={s.id} class:list={['border-b-2 border-ink', i === 0 ? 'bg-blueprint' : i % 2 ? 'bg-paper' : 'bg-paper-deep']} aria-labelledby={`${s.id}-h`}>
+          <div class="wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-12 lg:gap-14">
+            <div class:list={['lg:col-span-6', flip ? 'lg:order-2' : '']}>
+              <p class:list={['mono flex flex-wrap items-center gap-3 text-sm', i === 0 ? 'text-blueprint-line' : 'text-filament-ink']}>
+                <span class="border border-current px-1.5">{s.no}</span>
+                <span>
+                  {sp.phaseLabel}: {phases[s.id]}
+                </span>
+              </p>
+              <h2 id={`${s.id}-h`} class="mt-4 text-4xl sm:text-5xl">{s.title}</h2>
+              <p class:list={['mt-4 text-xl', i === 0 ? 'text-blueprint-paper' : 'text-ink']}>{s.short}</p>
+              <p class:list={['mt-4', i === 0 ? 'text-blueprint-paper/80' : 'text-ink-2']}>{s.body}</p>
+              {s.todo && <Rich as="p" class="mt-4 text-sm" lang={lang} text={`[[TODO: ${s.todo}]]`} />}
+
+              <div class="mt-8 grid gap-6 sm:grid-cols-2">
+                <div>
+                  <h3 class:list={['mono text-sm font-medium', i === 0 ? 'text-blueprint-line' : 'text-ink-3']}>{sp.youGet}</h3>
+                  <ul class="mt-3 space-y-2">
+                    {s.outputs.map((o) => (
+                      <li class="flex gap-2">
+                        <Icon name="check" size={18} class={`mt-1 shrink-0 ${i === 0 ? 'text-filament' : 'text-filament-ink'}`} />
+                        {o}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h3 class:list={['mono text-sm font-medium', i === 0 ? 'text-blueprint-line' : 'text-ink-3']}>{sp.weNeed}</h3>
+                  <ul class="mt-3 space-y-2">
+                    {s.inputs.map((o) => (
+                      <li class="flex gap-2">
+                        <span class={`mono mt-0.5 shrink-0 ${i === 0 ? 'text-blueprint-line' : 'text-blueprint'}`}>→</span>
+                        {o}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+              <p class:list={['mt-8 border-l-4 pl-4', i === 0 ? 'border-filament text-blueprint-paper/90' : 'border-filament text-ink-2']}>
+                <span class="mono text-sm font-medium">{sp.fits}: </span>
+                {s.fits}
+              </p>
+              <a href={path('contact', lang)} class:list={['btn mt-8', i === 0 ? 'btn-light' : 'btn-primary']}>
+                {t.ui.cta} <Icon name="arrowRight" size={18} />
+              </a>
+            </div>
+
+            <div class:list={['flex flex-col gap-6 lg:col-span-6', flip ? 'lg:order-1' : '']}>
+              <div class:list={[i === 0 ? '' : 'sheet corners p-5 sm:p-8']}>
+                {s.id === 'design' && <ModelIllo title={s.title} lang={lang} class="h-auto w-full" />}
+                {s.id === '3d-printing' && <PrinterIllo title={s.title} class="mx-auto h-auto w-full max-w-md" />}
+                {s.id === 'laser' && <LaserIllo title={s.title} class="mx-auto h-auto w-full max-w-md" />}
+                {s.id === 'packaging' && <DielineIllo title={t.home.packaging.drawingTitle} legend={t.home.packaging.legend} class="h-auto w-full" />}
+                {s.id === 'graphics' && <LabelIllo title={s.title} lang={lang} class="mx-auto h-auto w-full max-w-sm" />}
+              </div>
+              {/* PHOTO: replace with a real shot — see PhotoSlot.astro for instructions */}
+              <PhotoSlot aspect="4/3" note={photos[s.id].note} size={photos[s.id].size} label={t.ui.photoSlot} class="max-w-md" />
+            </div>
+          </div>
+        </section>
+      );
+    })
+  }
+
+  <CtaBand lang={lang} />
+</Base>

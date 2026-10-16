@@ -1,0 +1,42 @@
+---
+/* Fallback thank-you page (form POST without JS, Formspree _next redirect). */
+import Base from '../layouts/Base.astro';
+import Rich from '../components/Rich.astro';
+import Icon from '../components/Icon.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const th = t.thanks;
+---
+
+<Base lang={lang} page="thanks">
+  <section class="bg-mm border-b-2 border-ink">
+    <div class="wrap py-16 sm:py-24">
+      <div class="sheet corners max-w-4xl p-6 sm:p-10">
+        <p class="mono text-sm text-filament-ink">✓ {th.kicker}</p>
+        <h1 class="mt-3 text-4xl sm:text-6xl">{th.title}</h1>
+        <p class="mt-4 text-lg text-ink-2">{th.lead}</p>
+        <ol class="mt-8 grid gap-6 sm:grid-cols-3">
+          {
+            th.steps.map((s, i) => (
+              <li class="border-t-2 border-ink pt-4">
+                <span class="mono text-sm text-ink-3">0{i + 1}</span>
+                <h2 class="mt-1 text-2xl">{s.title}</h2>
+                <Rich as="p" class="mt-2 text-ink-2" lang={lang} text={s.body} />
+              </li>
+            ))
+          }
+        </ol>
+        <p class="label mt-8">{th.nda}</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a class="btn btn-ghost" href={path('home', lang)}>{t.ui.backHome}</a>
+          <a class="btn btn-primary" href={path('examples', lang)}>{t.ui.allExamples} <Icon name="arrowRight" size={18} /></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

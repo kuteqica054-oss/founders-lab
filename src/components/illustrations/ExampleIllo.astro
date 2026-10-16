@@ -1,0 +1,77 @@
+---
+/* Line drawings for example scenarios (used until real photos exist). */
+interface Props {
+  kind: 'mount' | 'organizer' | 'giftbox' | 'enclosure' | 'none';
+  title: string;
+  class?: string;
+}
+const { kind, title, class: cls = '' } = Astro.props;
+const ink = 'var(--color-ink)';
+const bp = 'var(--color-blueprint)';
+const or = 'var(--color-filament)';
+---
+
+<svg viewBox="0 0 240 160" class={`draw ${cls}`} role="img" aria-label={title} fill="none" stroke={ink} stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">
+  <title>{title}</title>
+  {
+    kind === 'mount' && (
+      <g>
+        <path class="d" pathLength="1" d="M10 118 H230 M10 138 H230" />
+        <ellipse cx="10" cy="128" rx="4" ry="10" />
+        <path class="d" pathLength="1" d="M96 112 h48 v32 h-48 Z" fill="var(--color-filament-soft)" style="--i:1" />
+        <path class="d" pathLength="1" d="M120 112 V92" style="--i:2" />
+        <rect class="d" pathLength="1" x="72" y="20" width="96" height="72" rx="8" style="--i:2" />
+        <rect x="66" y="40" width="8" height="32" fill={or} stroke={ink} />
+        <rect x="166" y="40" width="8" height="32" fill={or} stroke={ink} />
+        <path d="M86 32 h68 v48 h-68 Z" stroke={bp} stroke-dasharray="4 3" stroke-width="1.2" />
+        <path d="M184 40 v32 M180 40 h8 M180 72 h8" stroke={bp} stroke-width="1" />
+        <text x="192" y="60" class="mono" font-size="11" fill={bp} stroke="none">TPU</text>
+      </g>
+    )
+  }
+  {
+    kind === 'organizer' && (
+      <g>
+        <path class="d" pathLength="1" d="M30 140 V60 H200 V140 Z" fill="var(--color-sheet)" />
+        <path class="d" pathLength="1" d="M30 60 L60 36 H230 L200 60 M230 36 V116 L200 140" style="--i:1" />
+        <path class="d" pathLength="1" d="M90 60 V140 M150 60 V140" style="--i:2" />
+        <path d="M150 60 L180 36 M90 60 L120 36" />
+        <rect x="40" y="76" width="40" height="52" stroke={bp} stroke-dasharray="4 3" stroke-width="1.2" />
+        <path d="M100 96 h40 M100 104 h40 M100 112 h40" stroke-width="1.2" />
+        <g stroke={or} stroke-width="2">
+          <circle cx="175" cy="100" r="12" />
+          <path d="M175 82v6M175 112v6M157 100h6M187 100h6" />
+        </g>
+      </g>
+    )
+  }
+  {
+    kind === 'giftbox' && (
+      <g>
+        <path class="d" pathLength="1" d="M20 140 V84 H190 V140 Z" fill="var(--color-sheet)" />
+        <path class="d" pathLength="1" d="M20 84 L50 64 H220 L190 84 M220 64 V120 L190 140" style="--i:1" />
+        <path d="M30 80 L56 68 H210 L186 80 Z" fill="var(--color-paper-deep)" stroke-width="1.2" />
+        {[78, 122, 166].map((x, i) => <ellipse class="d" pathLength="1" cx={x - 6} cy="74" rx="16" ry="5" fill={or} style={`--i:${2 + i * 0.4}`} />)}
+        <path class="d" pathLength="1" d="M60 20 L224 20 L214 52 L50 52 Z" fill="var(--color-sheet)" style="--i:2" />
+        <g stroke={or} stroke-width="1.8">
+          <circle cx="137" cy="36" r="9" />
+        </g>
+        <path d="M105 140 v-56" stroke={bp} stroke-dasharray="4 3" stroke-width="1.2" />
+      </g>
+    )
+  }
+  {
+    kind === 'enclosure' && (
+      <g>
+        <rect class="d" pathLength="1" x="40" y="30" width="160" height="104" rx="12" fill="var(--color-sheet)" />
+        <rect x="58" y="48" width="124" height="68" rx="4" stroke={bp} stroke-dasharray="4 3" stroke-width="1.2" />
+        <path d="M70 60 h30 v18 h-30 Z M112 60 h14 v14 h-14 Z" stroke={bp} stroke-width="1" />
+        {[0, 1, 2, 3, 4].map((i) => <path d={`M${136 + i * 9} 92 v16`} stroke-width="2.2" />)}
+        {[[54, 44], [186, 44], [54, 120], [186, 120]].map(([x, y]) => <circle cx={x} cy={y} r="4" />)}
+        <path d="M200 70 h14 v24 h-14" stroke={or} stroke-width="2" />
+        <path d="M30 140 h180" stroke={or} stroke-width="3" />
+        <text x="214" y="64" class="mono" font-size="11" fill={bp} stroke="none">USB</text>
+      </g>
+    )
+  }
+</svg>

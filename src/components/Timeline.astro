@@ -1,0 +1,72 @@
+---
+/* Process timeline: 3 phase brackets (dimension-line style) over 7 steps.
+   Horizontal rail on desktop, vertical on mobile. */
+import Rich from './Rich.astro';
+import { useDict, type Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  compact?: boolean;
+}
+const { lang, compact = false } = Astro.props;
+const t = useDict(lang);
+const p = t.home.process;
+const spans = t.phases.map((ph) => ph.steps.length);
+---
+
+<div>
+  <!-- phase brackets (desktop) -->
+  <div class="mb-2 hidden grid-cols-7 gap-0 lg:grid" aria-hidden="true">
+    {
+      t.phases.map((ph, i) => (
+        <div class="px-2" style={`grid-column: span ${spans[i]} / span ${spans[i]}`}>
+          <div class="flex items-center text-blueprint">
+            <span class="h-4 w-px bg-current" />
+            <span class="h-px flex-1 bg-current" />
+            <span class="mono px-3 text-sm font-medium">
+              {ph.no} · {ph.title}
+            </span>
+            <span class="h-px flex-1 bg-current" />
+            <span class="h-4 w-px bg-current" />
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <ol class="relative grid gap-0 lg:grid-cols-7">
+    <!-- rail -->
+    <span class="absolute top-0 bottom-0 left-[1.15rem] w-0.5 bg-ink lg:top-[1.15rem] lg:right-0 lg:bottom-auto lg:left-0 lg:h-0.5 lg:w-auto" aria-hidden="true"></span>
+    {
+      t.steps.map((s, i) => {
+        const phase = t.phases.find((ph) => ph.steps.includes(s.no));
+        return (
+          <li class="relative grid grid-cols-[2.3rem_1fr] gap-x-4 pb-8 lg:block lg:px-2 lg:pb-0" data-reveal style={`--i:${i}`}>
+            <span
+              class:list={[
+                'mono relative z-10 grid h-[2.3rem] w-[2.3rem] place-items-center border-2 border-ink text-sm font-medium',
+                i === 2 || i === 5 ? 'bg-filament' : 'bg-paper',
+              ]}
+            >
+              {s.no}
+            </span>
+            <div class="lg:mt-5">
+              <p class="label lg:hidden">{phase?.no} · {phase?.title}</p>
+              <h3 class="mt-1 text-xl leading-tight lg:mt-0 lg:text-[1.2rem]">{s.title}</h3>
+              {!compact && <p class="mt-2 text-[0.95rem] text-ink-2">{s.body}</p>}
+              <dl class="mono mt-3 space-y-1 text-xs">
+                <div class="flex gap-1.5">
+                  <dt class="text-ink-3">{p.outLabel}:</dt>
+                  <dd class="text-ink">{s.out}</dd>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <dt class="text-ink-3">{p.timeLabel}:</dt>
+                  <dd>{s.time ? s.time : <Rich lang={lang} text={p.todoTime} />}</dd>
+                </div>
+              </dl>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ol>
+</div>

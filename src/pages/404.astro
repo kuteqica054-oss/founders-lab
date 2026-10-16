@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { useDict } from '../i18n';
+const t = useDict('en');
+---
+
+<Base lang="en" page="home" title={t.meta.notFound.title} description={t.meta.notFound.description} robots="noindex" bare>
+  <section class="bg-mm border-b-2 border-ink">
+    <div class="wrap py-20 sm:py-28">
+      <p class="font-display text-[7rem] leading-none font-extrabold text-filament sm:text-[10rem]">404</p>
+      <h1 class="mt-4 text-4xl sm:text-5xl">{t.notFound.title}</h1>
+      <p class="mt-4 text-lg text-ink-2">{t.notFound.lead}</p>
+      <a class="btn btn-primary mt-8" href="/">{t.ui.backHome} <Icon name="arrowRight" size={18} /></a>
+    </div>
+  </section>
+</Base>

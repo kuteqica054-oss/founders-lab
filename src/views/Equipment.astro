@@ -1,0 +1,92 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import SpecSheet from '../components/SpecSheet.astro';
+import PartnersNote from '../components/PartnersNote.astro';
+import MaterialsTable from '../components/MaterialsTable.astro';
+import PrinterIllo from '../components/illustrations/PrinterIllo.astro';
+import LaserIllo from '../components/illustrations/LaserIllo.astro';
+import PhotoSlot from '../components/PhotoSlot.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Icon from '../components/Icon.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { breadcrumbLd } from '../lib/schema';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const ep = t.equipmentPage;
+const eq = t.equipmentSpecs;
+const h = t.home.equipment;
+const photoSlots = [
+  { note: 'Workshop overview: bench, shelves, machines', size: '2400 × 1600 px', aspect: '3/2' },
+  { note: '3D printers at work', size: '1600 × 1200 px', aspect: '4/3' },
+  { note: 'Laser engraving macro', size: '1600 × 1200 px', aspect: '4/3' },
+  { note: 'Finished samples on the bench', size: '1600 × 1200 px', aspect: '4/3' },
+];
+---
+
+<Base lang={lang} page="equipment" jsonLd={[breadcrumbLd(lang, [{ name: ep.kicker, path: path('equipment', lang) }])]}>
+  <PageHero lang={lang} page="equipment" kicker={ep.kicker} title={ep.title} lead={ep.lead} sheet={4} />
+
+  <section class="wrap grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2" aria-label={eq.print.title}>
+    <div class="sheet corners p-6 sm:p-10">
+      <PrinterIllo title={eq.print.title} class="mx-auto h-auto w-full max-w-md" />
+    </div>
+    <SpecSheet lang={lang} no="EQ-01" title={eq.print.title} can={eq.print.can} rows={eq.print.rows} canLabel={h.canLabel} specLabel={h.specLabel} />
+  </section>
+
+  <section class="bg-paper-deep border-y-2 border-ink" aria-label={eq.laser.title}>
+    <div class="wrap grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2">
+      <SpecSheet lang={lang} no="EQ-02" title={eq.laser.title} can={eq.laser.can} rows={eq.laser.rows} canLabel={h.canLabel} specLabel={h.specLabel} class="lg:order-1" />
+      <div class="sheet corners p-6 sm:p-10 lg:order-2">
+        <LaserIllo title={eq.laser.title} class="mx-auto h-auto w-full max-w-md" />
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap py-16 sm:py-20">
+    <PartnersNote lang={lang} />
+  </section>
+
+  <section id="materials" class="wrap pb-16 sm:pb-20" aria-labelledby="mat-h">
+    <SectionHead lang={lang} no="M" kicker={ep.materialsTitle} title={ep.materialsTitle} lead={ep.materialsLead} id="mat-h" />
+    <div class="mt-10"><MaterialsTable lang={lang} /></div>
+  </section>
+
+  <section class="bg-blueprint" aria-labelledby="files-h">
+    <div class="wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-12">
+      <h2 id="files-h" class="text-4xl lg:col-span-4">{eq.files.title}</h2>
+      <ul class="grid gap-6 sm:grid-cols-3 lg:col-span-8">
+        {
+          eq.files.groups.map((g) => (
+            <li class="border-t-2 border-blueprint-line pt-4">
+              <p class="mono text-sm text-blueprint-line">{g.name}</p>
+              <ul class="mt-3 flex flex-wrap gap-2">
+                {g.list.map((x) => (
+                  <li class="mono inline-flex items-center gap-1.5 border border-blueprint-paper/60 px-2.5 py-1.5 text-sm">
+                    <Icon name="file" size={14} />
+                    .{x.toLowerCase()}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap py-16 sm:py-20" aria-labelledby="ph-h">
+    <h2 id="ph-h" class="text-3xl">{ep.photoNote}</h2>
+    <!-- PHOTOS: drop real workshop shots into src/assets/photos and pass them as src={…} -->
+    <div class="mt-8 grid gap-5 md:grid-cols-2">
+      {photoSlots.map((p) => <PhotoSlot note={p.note} size={p.size} aspect={p.aspect} label={t.ui.photoSlot} />)}
+    </div>
+  </section>
+
+  <CtaBand lang={lang} />
+</Base>

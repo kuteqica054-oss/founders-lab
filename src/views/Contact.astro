@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import BriefForm from '../components/BriefForm.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import Icon from '../components/Icon.astro';
+import { useDict, todoChip, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { breadcrumbLd } from '../lib/schema';
+import config from '../../site.config.mjs';
+import { cityLine, fullAddress, telHref, socialLinks } from '../lib/contact';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const cp = t.contactPage;
+const c = config.contact;
+const rows = [
+  { icon: 'mail', label: cp.email, html: c.email ? `<a class="link" href="mailto:${c.email}">${c.email}</a>` : todoChip('email') },
+  { icon: 'phone', label: cp.phone, html: c.phone ? `<a class="link" href="${telHref(c.phone)}">${c.phone}</a>` : todoChip('phone') },
+  { icon: 'pin', label: cp.address, html: fullAddress || `${cityLine}<br />${todoChip('street address')}` },
+  { icon: 'clock', label: cp.hours, html: c.hours || todoChip('hours') },
+] as const;
+---
+
+<Base lang={lang} page="contact" jsonLd={[breadcrumbLd(lang, [{ name: cp.kicker, path: path('contact', lang) }])]}>
+  <PageHero lang={lang} page="contact" kicker={cp.kicker} title={cp.title} lead={cp.lead} sheet={8} />
+
+  <section class="wrap grid gap-12 py-16 sm:py-20 lg:grid-cols-12">
+    <div class="lg:col-span-8 lg:order-2">
+      <BriefForm lang={lang} idPrefix="contact" />
+    </div>
+    <aside class="lg:col-span-4 lg:order-1" aria-labelledby="direct-h">
+      <h2 id="direct-h" class="text-3xl">{cp.direct}</h2>
+      <dl class="mt-6 divide-y divide-ink/20 border-y-2 border-ink">
+        {
+          rows.map((r) => (
+            <div class="flex gap-4 py-4">
+              <Icon name={r.icon} class="mt-1 shrink-0 text-filament-ink" />
+              <div>
+                <dt class="mono text-sm text-ink-3">{r.label}</dt>
+                <dd class="mt-1" set:html={r.html} />
+              </div>
+            </div>
+          ))
+        }
+      </dl>
+      <div class="mt-6"><WhatsAppButton lang={lang} /></div>
+      <p class="label mt-6">{cp.visit}</p>
+      <div class="mt-8 border-2 border-dashed border-grid-strong p-5">
+        <p class="mono text-sm">{t.footer.social}</p>
+        <ul class="mt-3 flex gap-2">
+          {
+            socialLinks.map((s) => (
+              <li>
+                <a
+                  href={s.href || '#'}
+                  class="grid h-11 w-11 place-items-center border-[1.5px] border-ink hover:bg-ink hover:text-paper"
+                  aria-label={s.label + (s.href ? '' : ' (TODO)')}
+                  data-todo={s.href ? undefined : ''}
+                  target={s.href ? '_blank' : undefined}
+                  rel={s.href ? 'me noopener' : undefined}
+                >
+                  <Icon name={s.icon} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </aside>
+  </section>
+</Base>

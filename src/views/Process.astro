@@ -1,0 +1,111 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import SectionHead from '../components/SectionHead.astro';
+import IterationRow from '../components/IterationRow.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Rich from '../components/Rich.astro';
+import Icon from '../components/Icon.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { breadcrumbLd } from '../lib/schema';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const pp = t.processPage;
+---
+
+<Base lang={lang} page="process" jsonLd={[breadcrumbLd(lang, [{ name: pp.kicker, path: path('process', lang) }])]}>
+  <PageHero lang={lang} page="process" kicker={pp.kicker} title={pp.title} lead={pp.lead} sheet={3} />
+
+  <!-- three phases -->
+  <section class="wrap py-16 sm:py-20" aria-labelledby="ph-h">
+    <h2 id="ph-h" class="sr-only">{pp.phasesTitle}</h2>
+    <ol class="grid gap-0 border-2 border-ink md:grid-cols-3">
+      {
+        t.phases.map((ph, i) => (
+          <li class:list={['relative p-6 sm:p-8', i > 0 ? 'border-t-2 border-ink md:border-t-0 md:border-l-2' : '', i === 1 ? 'bg-sheet' : 'bg-paper']} data-reveal style={`--i:${i}`}>
+            <span class="font-display text-7xl font-extrabold text-filament" aria-hidden="true">{ph.no}</span>
+            <h3 class="mt-2 text-3xl">{ph.title}</h3>
+            <p class="mt-3 text-ink-2">{ph.body}</p>
+            <p class="mono mt-6 text-sm text-blueprint">
+              {pp.stepLabel} {ph.steps.join(' · ')}
+            </p>
+            {i < 2 && (
+              <span class="absolute top-1/2 -right-4 z-10 hidden h-8 w-8 -translate-y-1/2 place-items-center border-2 border-ink bg-filament md:grid" aria-hidden="true">
+                <Icon name="arrowRight" size={16} />
+              </span>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+    <p class="sticky-note mt-8 inline-block -rotate-1">{pp.anyPhase}</p>
+  </section>
+
+  <!-- seven steps, detailed -->
+  <section class="bg-mm-soft border-y-2 border-ink" aria-labelledby="st-h">
+    <div class="wrap py-16 sm:py-20">
+      <SectionHead lang={lang} no="07" kicker={pp.stepsTitle} title={t.home.process.title} id="st-h" />
+      <ol class="mt-12 space-y-0">
+        {
+          t.steps.map((s, i) => {
+            const phase = t.phases.find((ph) => ph.steps.includes(s.no));
+            return (
+              <li class="grid gap-4 border-t-2 border-ink py-8 md:grid-cols-12 md:gap-8" data-reveal>
+                <div class="flex items-start gap-4 md:col-span-4">
+                  <span class:list={['mono grid h-12 w-12 shrink-0 place-items-center border-2 border-ink text-lg font-medium', i === 2 || i === 5 ? 'bg-filament' : 'bg-paper']}>{s.no}</span>
+                  <div>
+                    <p class="label">{phase?.no} · {phase?.title}</p>
+                    <h3 class="mt-1 text-2xl sm:text-3xl">{s.title}</h3>
+                  </div>
+                </div>
+                <p class="text-lg text-ink-2 md:col-span-5">{s.body}</p>
+                <dl class="mono grid content-start gap-3 text-sm md:col-span-3">
+                  <div>
+                    <dt class="text-ink-3">{pp.youGet}</dt>
+                    <dd class="mt-0.5">{s.out}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-ink-3">{pp.duration}</dt>
+                    <dd class="mt-0.5">{s.time ? s.time : <Rich lang={lang} text={t.home.process.todoTime} />}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-ink-3">{pp.whatYouDo}</dt>
+                    <dd class="mt-0.5 font-sans text-[0.95rem]">{pp.roles[i]}</dd>
+                  </div>
+                </dl>
+              </li>
+            );
+          })
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- rules -->
+  <section class="wrap grid gap-10 py-16 sm:py-20 lg:grid-cols-12" aria-labelledby="rules-h">
+    <div class="lg:col-span-4">
+      <h2 id="rules-h" class="text-4xl">{pp.rules.title}</h2>
+    </div>
+    <ol class="grid gap-4 sm:grid-cols-2 lg:col-span-8">
+      {
+        pp.rules.items.map((r, i) => (
+          <li class="sheet flex gap-4 p-5" data-reveal style={`--i:${i}`}>
+            <span class="mono text-filament-ink">R{i + 1}</span>
+            <Rich lang={lang} text={r} />
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  <section class="wrap pb-16 sm:pb-24" aria-labelledby="it-h">
+    <SectionHead lang={lang} kicker={t.iterations.kicker} title={t.iterations.title} lead={t.iterations.lead} id="it-h" />
+    <div class="mt-10"><IterationRow lang={lang} /></div>
+  </section>
+
+  <CtaBand lang={lang} />
+</Base>

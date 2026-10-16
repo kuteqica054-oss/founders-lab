@@ -1,0 +1,61 @@
+---
+/* 3D printer printing a part layer by layer (CSS steps animation, static with reduced motion). */
+interface Props {
+  title: string;
+  class?: string;
+  bg?: string;
+}
+const { title, class: cls = '', bg = 'var(--color-sheet)' } = Astro.props;
+const bedY = 206;
+const layers = 10;
+const lh = 8;
+const top = bedY - layers * lh;
+// part silhouette: a small enclosure with a rounded shoulder
+const layerRects = Array.from({ length: layers }, (_, i) => {
+  const y = bedY - (i + 1) * lh;
+  const inset = i < 7 ? 0 : (i - 6) * 5;
+  return { x: 116 + inset, y, w: 88 - inset * 2, h: lh };
+});
+---
+
+<svg viewBox="0 0 320 250" class={cls} role="img" aria-label={title}>
+  <title>{title}</title>
+  <g fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linejoin="round">
+    <!-- frame -->
+    <path d="M40 232 V30 H280 V232"></path>
+    <path d="M28 232 H292"></path>
+    <path d="M40 54 H280" stroke-width="1.2" stroke-dasharray="4 4" opacity="0.5"></path>
+    <!-- bed -->
+    <rect x="72" y={bedY} width="176" height="10" fill="var(--color-paper-deep)"></rect>
+    <path d="M100 216 V232 M220 216 V232" stroke-width="1.6"></path>
+  </g>
+  <!-- printed layers -->
+  <g stroke="var(--color-ink)" stroke-width="1">
+    {layerRects.map((r) => <rect x={r.x} y={r.y} width={r.w} height={r.h} fill="var(--color-filament)" />)}
+  </g>
+  <!-- cover that reveals the layers bottom-up -->
+  <rect class="print-cover" x="110" y={top - 1} width="100" height={layers * lh + 0.5} fill={bg}></rect>
+  <!-- head: climbs one layer per step and moves sideways -->
+  <g class="print-z" style={`--h:${layers * lh}px`}>
+    <g class="print-head" style="--w:60px">
+      <g stroke="var(--color-ink)" stroke-width="2" stroke-linejoin="round">
+        <rect x="140" y={bedY - 46} width="40" height="30" fill="var(--color-sheet)"></rect>
+        <path d={`M152 ${bedY - 16} H168 L162 ${bedY - 6} H158 Z`} fill="var(--color-ink)"></path>
+        <path d={`M146 ${bedY - 36} H174 M146 ${bedY - 28} H174`} stroke-width="1"></path>
+      </g>
+      <circle cx="160" cy={bedY - 4} r="2.4" fill="var(--color-filament)"></circle>
+    </g>
+  </g>
+  <!-- filament spool + feed -->
+  <g fill="none" stroke="var(--color-ink)" stroke-width="1.6">
+    <circle cx="262" cy="16" r="12" fill="var(--color-paper)"></circle>
+    <circle cx="262" cy="16" r="4"></circle>
+    <path d="M250 18 C210 20 190 40 170 60" stroke="var(--color-filament)" stroke-width="1.8"></path>
+  </g>
+  <!-- dimension: layer height -->
+  <g class="mono" fill="var(--color-blueprint)" font-size="11">
+    <path d={`M226 ${bedY - lh} H240 M226 ${bedY} H240`} stroke="var(--color-blueprint)" stroke-width="1"></path>
+    <path d={`M236 ${bedY - lh - 10} V${bedY - lh} M236 ${bedY} V${bedY + 10}`} stroke="var(--color-blueprint)" stroke-width="1"></path>
+    <text x="244" y={bedY - 1}>z</text>
+  </g>
+</svg>

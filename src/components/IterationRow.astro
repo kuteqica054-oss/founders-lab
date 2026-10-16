@@ -1,0 +1,83 @@
+---
+/* v1 → v2 → v3 → batch for the same illustrative phone stand. */
+import { standProfiles, tf, poly, type Pt } from '../lib/geo';
+import { useDict, rich, type Lang } from '../i18n';
+import { fmt } from '../lib/format';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang).iterations;
+const f = fmt(lang);
+const S = 1.25;
+const variants = [
+  { key: 'v1', pts: standProfiles.v1, width: 56, angle: 70 },
+  { key: 'v2', pts: standProfiles.v2, width: 62, angle: 65 },
+  { key: 'v3', pts: standProfiles.v3, width: 86, angle: 65 },
+  { key: 'v3', pts: standProfiles.v3, width: 86, angle: 65 },
+] as const;
+const phone = (angle: number): Pt[] => {
+  // phone leaning on the slab front face, from the slot at (24,92)
+  const a = (angle * Math.PI) / 180;
+  const ux = Math.cos(a), uy = -Math.sin(a);
+  const nx = -Math.sin(a), ny = -Math.cos(a);
+  const L = 128, T = 8;
+  const A: Pt = [24, 92];
+  const B: Pt = [24 + ux * L, 92 + uy * L];
+  return [A, B, [B[0] + nx * T, B[1] + ny * T], [A[0] + nx * T, A[1] + ny * T]];
+};
+---
+
+<ol class="grid gap-px border border-ink/70 bg-ink/70 sm:grid-cols-2 lg:grid-cols-4">
+  {
+    t.items.map((it, i) => {
+      const v = variants[i];
+      const ox = 20, oy = 34;
+      const pts = tf(v.pts, S, ox, oy);
+      const ph = tf(phone(v.angle), S, ox, oy);
+      const isBatch = i === 3;
+      const bl = pts[0][0], br = pts[1][0], by = pts[0][1];
+      return (
+        <li class="draw flex flex-col bg-sheet p-5" style={`--i:${i}`}>
+          <div class="flex items-baseline justify-between">
+            <span class:list={['mono text-2xl font-medium', isBatch ? 'text-filament-ink' : 'text-blueprint']}>{it.v}</span>
+            <span class="label">{it.change}</span>
+          </div>
+          <svg viewBox="0 0 180 200" class="my-3 h-auto w-full" role="img" aria-label={`${it.v} — ${it.title}`}>
+            {isBatch ? (
+              <g stroke="var(--color-ink)" stroke-width="1.6" stroke-linejoin="round">
+                {[0, 1, 2].map((k) => (
+                  <path d={poly(tf(v.pts, 0.72, 18 + k * 30, 62 - k * 16))} fill={k === 2 ? 'var(--color-filament)' : 'var(--color-filament-soft)'} />
+                ))}
+                <path d="M10 150 H150 V186 H10 Z" fill="var(--color-paper-deep)" />
+                <path d="M10 150 L30 134 H170 L150 150 Z" fill="var(--color-sheet)" />
+                <path d="M150 186 L170 170 V134 L150 150 Z" fill="var(--color-paper-deep)" />
+                <g fill="none" stroke="var(--color-filament-ink)" stroke-width="1.4">
+                  <circle cx="80" cy="168" r="8" />
+                </g>
+              </g>
+            ) : (
+              <g>
+                <path class="fade" d={poly(ph)} fill="none" stroke="var(--color-ink-3)" stroke-width="1.2" stroke-dasharray="4 3" />
+                <path class="d" pathLength="1" d={poly(pts)} fill={i === 2 ? 'var(--color-filament-soft)' : 'none'} stroke="var(--color-ink)" stroke-width="2" stroke-linejoin="round" />
+                {i >= 1 && <circle cx={pts[6][0] + 2} cy={pts[6][1] + 4} r="3.2" fill="var(--color-sheet)" stroke="var(--color-filament-ink)" stroke-width="1.6" />}
+                {i === 2 && <path d={`M${bl + 18} ${by + 2.5} H${br - 18}`} stroke="var(--color-filament-ink)" stroke-width="3" />}
+                {i === 2 && <circle cx={pts[9][0] + 5} cy={pts[9][1] + 6} r="2.6" fill="none" stroke="var(--color-filament-ink)" stroke-width="1.2" />}
+                <g class="fade" stroke="var(--color-blueprint)" stroke-width="1" fill="none">
+                  <path d={`M${bl} ${by + 6} V${by + 26} M${br} ${by + 6} V${by + 26} M${bl + 3} ${by + 19} H${br - 3}`} />
+                  <path d={`M${bl + 3} ${by + 19} l7 -3.5 v7Z M${br - 3} ${by + 19} l-7 -3.5 v7Z`} fill="var(--color-blueprint)" />
+                </g>
+                <text class="fade mono" x={(bl + br) / 2} y={by + 40} text-anchor="middle" font-size="12" fill="var(--color-blueprint)">
+                  {f.mm(v.width)} · {f.deg(v.angle)}
+                </text>
+              </g>
+            )}
+          </svg>
+          <h3 class="text-xl">{it.title}</h3>
+          <p class="mt-2 text-[0.95rem] text-ink-2">{it.note}</p>
+        </li>
+      );
+    })
+  }
+</ol>
+<p class="label mt-4" set:html={rich(t.footnote, lang)} />

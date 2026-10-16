@@ -1,0 +1,63 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import PricingFactors from '../components/PricingFactors.astro';
+import CtaBand from '../components/CtaBand.astro';
+import Rich from '../components/Rich.astro';
+import { useDict, type Lang } from '../i18n';
+import { path } from '../i18n/routes';
+import { breadcrumbLd } from '../lib/schema';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang);
+const pp = t.pricingPage;
+---
+
+<Base lang={lang} page="pricing" jsonLd={[breadcrumbLd(lang, [{ name: pp.kicker, path: path('pricing', lang) }])]}>
+  <PageHero lang={lang} page="pricing" kicker={pp.kicker} title={pp.title} lead={pp.lead} sheet={6}>
+    <p class="mono mt-8 inline-block max-w-full border-[1.5px] border-ink bg-paper px-4 py-3 text-sm break-words sm:text-base">
+      {t.home.pricing.formula}
+    </p>
+  </PageHero>
+
+  <section class="wrap py-16 sm:py-20" aria-labelledby="f-h">
+    <h2 id="f-h" class="text-4xl sm:text-5xl">{pp.factorsTitle}</h2>
+    <div class="mt-10"><PricingFactors lang={lang} detailed /></div>
+  </section>
+
+  <section class="bg-paper-deep border-y-2 border-ink" aria-labelledby="q-h">
+    <div class="wrap grid gap-12 py-16 sm:py-20 lg:grid-cols-2">
+      <div>
+        <h2 id="q-h" class="text-4xl">{pp.quoteTitle}</h2>
+        <ol class="mt-8 space-y-0 border-l-2 border-ink">
+          {
+            pp.quoteSteps.map((s, i) => (
+              <li class="relative pb-6 pl-8 last:pb-0" data-reveal style={`--i:${i}`}>
+                <span class="mono absolute top-0 -left-[0.95rem] grid h-7 w-7 place-items-center border-2 border-ink bg-paper text-xs">{i + 1}</span>
+                <p class="pt-0.5 text-lg">{s}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <Rich as="p" class="sticky-note mt-8 inline-block rotate-1" lang={lang} text={pp.freeQuote} />
+      </div>
+      <div>
+        <h2 class="text-4xl">{pp.tipsTitle}</h2>
+        <ul class="mt-8 space-y-4">
+          {
+            pp.tips.map((tip, i) => (
+              <li class="sheet flex gap-4 p-5" data-reveal style={`--i:${i}`}>
+                <span class="mono text-filament-ink">✓</span>
+                {tip}
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand lang={lang} />
+</Base>

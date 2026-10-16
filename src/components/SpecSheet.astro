@@ -1,0 +1,52 @@
+---
+/* A capability-first spec sheet: what we can do, then the (TODO) parameters. */
+import Rich from './Rich.astro';
+import Icon from './Icon.astro';
+import { type Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  no: string;
+  title: string;
+  can: string[];
+  rows: string[][];
+  canLabel: string;
+  specLabel: string;
+  class?: string;
+}
+const { lang, no, title, can, rows, canLabel, specLabel, class: cls = '' } = Astro.props;
+---
+
+<section class:list={['sheet corners flex flex-col', cls]} data-reveal>
+  <header class="flex items-center justify-between border-b border-ink/70 px-5 py-3">
+    <h3 class="text-2xl">{title}</h3>
+    <span class="mono text-sm text-ink-3">{no}</span>
+  </header>
+  <div class="px-5 py-5">
+    <p class="label mb-3">{canLabel}</p>
+    <ul class="space-y-2">
+      {
+        can.map((c) => (
+          <li class="flex gap-3">
+            <Icon name="check" size={18} class="mt-1 shrink-0 text-filament-ink" />
+            <span>{c}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <div class="mt-auto border-t border-dashed border-ink/40 px-5 py-4">
+    <table class="w-full border-collapse text-sm">
+      <caption class="label mb-2 text-left">{specLabel}</caption>
+      <tbody>
+        {
+          rows.map(([k, v]) => (
+            <tr class="border-b border-grid last:border-b-0">
+              <th scope="row" class="mono w-1/2 py-2 pr-3 text-left align-top font-normal text-ink-2">{k}</th>
+              <td class="py-2 align-top"><Rich lang={lang} text={v} /></td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</section>

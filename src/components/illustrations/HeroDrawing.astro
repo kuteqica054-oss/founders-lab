@@ -1,0 +1,142 @@
+---
+/* Hero: hand sketch → 3D wireframe → boxed prototype, linked by dimension lines.
+   Strokes with class "d" draw in on load (see global.css). */
+import { standProfiles, tf, poly, extrude, sketch, type Pt } from '../../lib/geo';
+import { useDict, type Lang } from '../../i18n';
+import { fmt } from '../../lib/format';
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = useDict(lang).home.hero.drawing;
+const f = fmt(lang);
+const v3 = standProfiles.v3;
+
+// 01 — sketch
+const S = 1.3;
+const sk = tf(v3, S, 30, 100);
+const sketchStrokes = sketch(sk, 11, 2.2, 4);
+const phoneLocal: Pt[] = [[24, 92], [87, -44], [78.8, -47.8], [15.8, 88.2]];
+const phoneSketch = sketch(tf(phoneLocal, S, 30, 100), 5, 1.5, 3);
+
+// 02 — wireframe
+const W = 1.45;
+const wf = tf(v3, W, 300, 120);
+const wire = extrude(wf, 58, -33);
+const baseL = wf[0][0];
+const baseR = wf[1][0];
+const baseY = wf[0][1];
+const ax = 300 + 24 * W;
+const ay = 120 + 92 * W;
+const rad = 30;
+const a65 = (65 * Math.PI) / 180;
+
+// 03 — boxed prototype
+const st = tf(v3, 1, 176, 362);
+const stEx = extrude(st, 30, -17);
+const stBack = tf(v3, 1, 206, 345);
+---
+
+<figure class="draw relative" aria-labelledby="hero-fig-title">
+  <svg viewBox="0 0 640 600" class="h-auto w-full" role="img" aria-labelledby="hero-fig-title">
+    <title id="hero-fig-title">{t.title}</title>
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0 1 10 5 0 9Z" fill="var(--color-blueprint)"></path>
+      </marker>
+    </defs>
+
+    <!-- 01 sketch (graphite pencil) -->
+    <g fill="none" stroke="var(--color-ink)" stroke-width="2" stroke-linecap="round">
+      {sketchStrokes.map((d, i) => <path class="d" pathLength="1" d={d} style={`--i:${i * 0.25}`} />)}
+      {phoneSketch.map((d, i) => <path class="d" pathLength="1" d={d} stroke-width="1.6" style={`--i:${3 + i * 0.3}`} />)}
+      <path class="d" pathLength="1" d="M48 214 q20 6 44 -2 t40 2" stroke-width="1.4" style="--i:5" />
+    </g>
+    <g class="fade" style="--i:2">
+      <text x="30" y="268" class="font-display" font-size="24" font-weight="700" fill="var(--color-ink)">01 · {t.sketch}</text>
+    </g>
+
+    <!-- arrow sketch → model -->
+    <path
+      class="fade"
+      d="M150 150 C200 120 240 120 282 150"
+      fill="none"
+      stroke="var(--color-blueprint)"
+      stroke-width="1.6"
+      stroke-dasharray="6 5"
+      marker-end="url(#arr)"
+      style="--i:6"
+    ></path>
+
+    <!-- 02 wireframe (blueprint) -->
+    <g fill="none" stroke="var(--color-blueprint)" stroke-linejoin="round">
+      <path class="d" pathLength="1" d={wire.back} stroke-width="1.2" opacity="0.55" style="--i:6"></path>
+      <path class="d" pathLength="1" d={wire.edges} stroke-width="1.2" opacity="0.75" style="--i:7"></path>
+      <path class="d" pathLength="1" d={wire.front} stroke-width="2.2" style="--i:7"></path>
+    </g>
+    <!-- dimensions on the model -->
+    <g class="fade" style="--i:8" stroke="var(--color-blueprint)" fill="none" stroke-width="1.1">
+      <path d={`M${baseL} ${baseY + 6} V${baseY + 34} M${baseR} ${baseY + 6} V${baseY + 34}`}></path>
+      <path d={`M${baseL + 2} ${baseY + 26} H${baseR - 2}`} marker-start="url(#arr)" marker-end="url(#arr)"></path>
+      <path d={`M${ax + rad} ${ay} A${rad} ${rad} 0 0 0 ${ax + rad * Math.cos(a65)} ${ay - rad * Math.sin(a65)}`}></path>
+      <path d={`M${ax} ${ay} H${ax + rad + 14}`} stroke-dasharray="3 3"></path>
+    </g>
+    <g class="fade mono" style="--i:8" fill="var(--color-blueprint)" font-size="17">
+      <rect x={(baseL + baseR) / 2 - 34} y={baseY + 15} width="68" height="22" fill="var(--color-paper)"></rect>
+      <text x={(baseL + baseR) / 2} y={baseY + 32} text-anchor="middle">{f.mm(86)}</text>
+      <text x={ax + rad + 8} y={ay - 16}>{f.deg(65)}</text>
+    </g>
+    <g class="fade" style="--i:8">
+      <text x="300" y={baseY + 66} class="font-display" font-size="24" font-weight="700" fill="var(--color-blueprint)">02 · {t.model}</text>
+    </g>
+
+    <!-- arrow model → box -->
+    <path
+      class="fade"
+      d="M470 300 C500 350 490 390 446 420"
+      fill="none"
+      stroke="var(--color-blueprint)"
+      stroke-width="1.6"
+      stroke-dasharray="6 5"
+      marker-end="url(#arr)"
+      style="--i:9"
+    ></path>
+    <g class="fade mono" style="--i:9">
+      <rect x="500" y="338" width="96" height="28" fill="var(--color-ink)"></rect>
+      <text x="548" y="358" text-anchor="middle" font-size="16" fill="var(--color-paper)">{t.rev}</text>
+    </g>
+
+    <!-- 03 boxed prototype -->
+    <g class="fade" style="--i:10" stroke="var(--color-ink)" stroke-width="1.8" stroke-linejoin="round">
+      <!-- back + left flaps -->
+      <path d="M174 419 L394 419 L378 360 L158 360 Z" fill="var(--color-sheet)"></path>
+      <path d="M110 455 L174 419 L128 404 L64 440 Z" fill="var(--color-paper-deep)"></path>
+      <!-- opening + insert -->
+      <path d="M110 455 L330 455 L394 419 L174 419 Z" fill="var(--color-ink)" opacity="0.85"></path>
+      <path d="M120 451 L322 451 L382 423 L180 423 Z" fill="var(--color-paper-deep)" stroke-width="1.2"></path>
+      <!-- product in the insert -->
+      <path d={poly(stBack)} fill="#c94a12" stroke-width="1.4"></path>
+      <path d={stEx.edges} fill="none" stroke-width="1.2"></path>
+      <path d={poly(st)} fill="var(--color-filament)" stroke-width="1.8"></path>
+      <!-- front + right faces -->
+      <path d="M110 455 L330 455 L330 540 L110 540 Z" fill="var(--color-sheet)"></path>
+      <path d="M330 455 L394 419 L394 504 L330 540 Z" fill="var(--color-paper-deep)"></path>
+      <path d="M330 455 L394 419 L450 432 L386 468 Z" fill="var(--color-sheet)"></path>
+      <!-- engraved logo on the box -->
+      <g fill="none" stroke="var(--color-filament-ink)" stroke-width="1.6">
+        <circle cx="220" cy="497" r="13"></circle>
+        <path d="M220 478v8M220 508v8M201 497h8M231 497h8"></path>
+      </g>
+    </g>
+    <g class="fade" style="--i:11">
+      <text x="414" y="520" class="font-display" font-size="24" font-weight="700" fill="var(--color-ink)">03 · {t.proto}</text>
+      <text x="414" y="546" class="mono" font-size="17" fill="var(--color-ink-2)">{t.box}</text>
+    </g>
+  </svg>
+  <figcaption
+    class="sticky-note absolute top-0 right-2 max-w-[11rem] -rotate-3 sm:right-6 sm:max-w-[13rem]"
+    aria-hidden="true"
+  >
+    {t.idea}
+  </figcaption>
+</figure>

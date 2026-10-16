@@ -1,0 +1,92 @@
+---
+/* Tuck-end box dieline + custom insert with the product silhouette.
+   Solid = cut, dashed blue = fold, orange = engraving / insert cut. */
+import { standProfiles, tf, poly } from '../../lib/geo';
+interface Props {
+  title: string;
+  legend: { cut: string; fold: string; glue: string; insert: string; engrave: string };
+  tone?: 'paper' | 'blueprint';
+  class?: string;
+}
+const { title, legend, tone = 'paper', class: cls = '' } = Astro.props;
+const dark = tone === 'blueprint';
+const cut = dark ? 'var(--color-blueprint-paper)' : 'var(--color-ink)';
+const fold = dark ? 'var(--color-blueprint-line)' : 'var(--color-blueprint)';
+const accent = 'var(--color-filament)';
+const txt = dark ? 'var(--color-blueprint-paper)' : 'var(--color-ink-2)';
+
+// Panels: front 90 | side 56 | back 90 | side 56 | glue 16 ; body height 120
+const x0 = 20, y0 = 110, H = 120, A = 90, Bw = 56;
+const xs = [x0, x0 + A, x0 + A + Bw, x0 + 2 * A + Bw, x0 + 2 * A + 2 * Bw];
+const yB = y0 + H;
+const outline = [
+  `M${xs[0]} ${y0}`,
+  // top dust flap (side 1)
+  `L${xs[1]} ${y0} L${xs[1] + 6} ${y0 - 34} L${xs[2] - 12} ${y0 - 40} L${xs[2]} ${y0}`,
+  // top lid on back panel + tuck
+  `L${xs[2]} ${y0 - Bw} L${xs[2] + 8} ${y0 - Bw - 22} Q${xs[2] + A / 2} ${y0 - Bw - 30} ${xs[3] - 8} ${y0 - Bw - 22} L${xs[3]} ${y0 - Bw} L${xs[3]} ${y0}`,
+  // top dust flap (side 2)
+  `L${xs[3] + 12} ${y0 - 40} L${xs[4] - 6} ${y0 - 34} L${xs[4]} ${y0}`,
+  // glue flap
+  `L${xs[4] + 16} ${y0 + 10} L${xs[4] + 16} ${yB - 10} L${xs[4]} ${yB}`,
+  // bottom dust flap (side 2)
+  `L${xs[4] - 6} ${yB + 34} L${xs[3] + 12} ${yB + 40} L${xs[3]} ${yB}`,
+  // bottom on front... (back panel bottom plain)
+  `L${xs[2]} ${yB}`,
+  // bottom dust flap (side 1)
+  `L${xs[2] - 12} ${yB + 40} L${xs[1] + 6} ${yB + 34} L${xs[1]} ${yB}`,
+  // bottom lid on front panel + tuck
+  `L${xs[1]} ${yB + Bw} L${xs[1] - 8} ${yB + Bw + 22} Q${xs[0] + A / 2} ${yB + Bw + 30} ${xs[0] + 8} ${yB + Bw + 22} L${xs[0]} ${yB + Bw} Z`,
+].join(' ');
+const folds = [
+  `M${xs[1]} ${y0} V${yB}`,
+  `M${xs[2]} ${y0} V${yB}`,
+  `M${xs[3]} ${y0} V${yB}`,
+  `M${xs[4]} ${y0} V${yB}`,
+  `M${xs[0]} ${y0} H${xs[4]}`,
+  `M${xs[0]} ${yB} H${xs[4]}`,
+  `M${xs[2]} ${y0 - Bw} H${xs[3]}`,
+  `M${xs[0]} ${yB + Bw} H${xs[1]}`,
+].join(' ');
+// insert
+const ix = 450, iy = 110, iw = 150, ih = 120;
+const silhouette = tf(standProfiles.v3, 0.95, ix + 34, iy + 4);
+---
+
+<svg viewBox="0 0 620 360" class={cls} role="img" aria-label={title}>
+  <title>{title}</title>
+  <path d={outline} fill={dark ? 'rgb(234 240 250 / 0.06)' : 'var(--color-sheet)'} stroke={cut} stroke-width="2" stroke-linejoin="round"></path>
+  <path d={folds} fill="none" stroke={fold} stroke-width="1.4" stroke-dasharray="6 4"></path>
+  <!-- engraved logo on front panel -->
+  <g fill="none" stroke={accent} stroke-width="2">
+    <circle cx={x0 + A / 2} cy={y0 + H / 2} r="16"></circle>
+    <path d={`M${x0 + A / 2} ${y0 + H / 2 - 26}v10M${x0 + A / 2} ${y0 + H / 2 + 16}v10M${x0 + A / 2 - 26} ${y0 + H / 2}h10M${x0 + A / 2 + 16} ${y0 + H / 2}h10`}></path>
+  </g>
+  <!-- glue hatch -->
+  <g stroke={txt} stroke-width="1" opacity="0.55">
+    {Array.from({ length: 9 }, (_, i) => <path d={`M${xs[4] + 2} ${y0 + 16 + i * 11} l12 -8`} />)}
+  </g>
+
+  <!-- insert -->
+  <rect x={ix} y={iy} width={iw} height={ih} fill={dark ? 'rgb(234 240 250 / 0.06)' : 'var(--color-sheet)'} stroke={cut} stroke-width="2"></rect>
+  <path d={poly(silhouette)} fill={dark ? 'var(--color-blueprint-deep)' : 'var(--color-paper-deep)'} stroke={accent} stroke-width="2"></path>
+  <path d={`M${ix + 8} ${iy + ih - 14} h20 M${ix + iw - 28} ${iy + ih - 14} h20`} stroke={cut} stroke-width="1.6"></path>
+  <!-- dimension above insert -->
+  <g stroke={fold} stroke-width="1" fill="none">
+    <path d={`M${ix} ${iy - 6} V${iy - 26} M${ix + iw} ${iy - 6} V${iy - 26} M${ix + 4} ${iy - 18} H${ix + iw - 4}`}></path>
+    <path d={`M${ix + 4} ${iy - 18} l8 -4 v8Z M${ix + iw - 4} ${iy - 18} l-8 -4 v8Z`} fill={fold}></path>
+  </g>
+  <text x={ix + iw / 2} y={iy - 30} text-anchor="middle" class="mono" font-size="13" fill={txt}>{legend.insert}</text>
+
+  <!-- legend -->
+  <g class="mono" font-size="13" fill={txt}>
+    <path d="M450 284 h30" stroke={cut} stroke-width="2"></path>
+    <text x="490" y="288">{legend.cut}</text>
+    <path d="M450 306 h30" stroke={fold} stroke-width="1.6" stroke-dasharray="6 4"></path>
+    <text x="490" y="310">{legend.fold}</text>
+    <path d="M450 328 h30" stroke={accent} stroke-width="2"></path>
+    <text x="490" y="332">{legend.engrave}</text>
+    <path d="M452 350 l12 -8 M462 350 l12 -8" stroke={txt} stroke-width="1"></path>
+    <text x="490" y="352">{legend.glue}</text>
+  </g>
+</svg>

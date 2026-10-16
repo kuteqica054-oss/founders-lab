@@ -1,0 +1,84 @@
+name: Deploy to Hostinger
+
+# Runs on every push to main (and manually from the Actions tab).
+# Builds the Astro site and uploads dist/ to the hosting over SSH.
+#
+# Required repository secrets (Settings → Secrets and variables → Actions → Secrets):
+#   FOUNDERS_SSH_HOST      e.g. 147.93.73.70
+#   FOUNDERS_SSH_PORT      e.g. 65002
+#   FOUNDERS_SSH_USER      e.g. u203670668
+#   FOUNDERS_SSH_PASSWORD  hosting SSH password
+# Required repository variable (Settings → Secrets and variables → Actions → Variables):
+#   SITE_URL               e.g. https://example.com  (no trailing slash)
+# Optional variable:
+#   FOUNDERS_DEPLOY_PATH   default: domains/<host from SITE_URL>/public_html (relative to the SSH home dir)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-founders-lab
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Check settings
+        env:
+          SSH_HOST: ${{ secrets.FOUNDERS_SSH_HOST }}
+          SSH_USER: ${{ secrets.FOUNDERS_SSH_USER }}
+          SSH_PASSWORD: ${{ secrets.FOUNDERS_SSH_PASSWORD }}
+        run: |
+          [ -n "$SITE_URL" ] || { echo "::error::Repository variable SITE_URL is not set (e.g. https://example.com)"; exit 1; }
+          for v in SSH_HOST SSH_USER SSH_PASSWORD; do
+            [ -n "${!v}" ] || { echo "::error::Secret FOUNDERS_$v is not set"; exit 1; }
+          done
+          HOST=$(echo "$SITE_URL" | sed -E 's#^https?://##; s#/.*$##; s#^www\.##')
+          echo "SITE_HOST=$HOST" >> "$GITHUB_ENV"
+          echo "DEPLOY_PATH=${{ vars.FOUNDERS_DEPLOY_PATH }}" | sed "s#=\$#=domains/$HOST/public_html#" >> "$GITHUB_ENV"
+
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+
+      - name: Upload over SSH
+        env:
+          SSHPASS: ${{ secrets.FOUNDERS_SSH_PASSWORD }}
+          SSH_HOST: ${{ secrets.FOUNDERS_SSH_HOST }}
+          SSH_PORT: ${{ secrets.FOUNDERS_SSH_PORT || '22' }}
+          SSH_USER: ${{ secrets.FOUNDERS_SSH_USER }}
+        run: |
+          sudo apt-get install -y -qq sshpass rsync >/dev/null
+          SSH="sshpass -e ssh -p $SSH_PORT -o StrictHostKeyChecking=accept-new"
+          echo "Deploying to $DEPLOY_PATH"
+          $SSH "$SSH_USER@$SSH_HOST" "ls -1 domains 2>/dev/null; mkdir -p '$DEPLOY_PATH'"
+          # Upload/overwrite site files. Files that exist only on the server are kept
+          # (no --delete) so nothing unrelated in public_html is ever removed.
+          rsync -az --stats -e "$SSH" dist/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH/"
+          $SSH "$SSH_USER@$SSH_HOST" "ls -la '$DEPLOY_PATH' | head -30"
+
+      - name: Smoke test live site
+        run: |
+          sleep 5
+          for u in / /services/ /contact/ /og/home.png /sitemap.xml /robots.txt; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://$SITE_HOST$u" || true)
+            echo "$code https://$SITE_HOST$u"
+          done
+          echo "--- title of /:"
+          curl -s "https://$SITE_HOST/" | grep -o '<title>[^<]*</title>' || echo "(no title found)"
+          echo "--- redirects:"
+          curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}\n' "http://$SITE_HOST/" || true
+          curl -s -o /dev/null -w '%{http_code} -> %{redirect_url}\n' "https://www.$SITE_HOST/" || true

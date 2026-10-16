@@ -1,0 +1,47 @@
+---
+/* Design & 3D: hand sketch on the left, dimensioned side view, isometric wireframe. */
+import { standProfiles, tf, poly, extrude, sketch } from '../../lib/geo';
+import { fmt } from '../../lib/format';
+import type { Lang } from '../../i18n';
+interface Props {
+  title: string;
+  lang: Lang;
+  tone?: 'paper' | 'blueprint';
+  class?: string;
+}
+const { title, lang, tone = 'blueprint', class: cls = '' } = Astro.props;
+const f = fmt(lang);
+const dark = tone === 'blueprint';
+const line = dark ? 'var(--color-blueprint-paper)' : 'var(--color-blueprint)';
+const soft = dark ? 'var(--color-blueprint-line)' : 'var(--color-blueprint)';
+const v = standProfiles.v3;
+const sk = sketch(tf(v, 1, 24, 40), 3, 2, 3);
+const side = tf(v, 1.2, 190, 30);
+const iso = extrude(tf(v, 1.2, 360, 50), 56, -30);
+---
+
+<svg viewBox="0 0 560 210" class={cls} role="img" aria-label={title}>
+  <title>{title}</title>
+  <g class="draw" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    {sk.map((d, i) => <path class="d" pathLength="1" d={d} stroke={dark ? 'var(--color-blueprint-paper)' : 'var(--color-ink)'} stroke-width="1.8" style={`--i:${i * 0.2}`} />)}
+    <path class="d" pathLength="1" d={poly(side)} stroke={line} stroke-width="2" style="--i:3"></path>
+    <path class="d" pathLength="1" d={iso.back} stroke={soft} stroke-width="1" opacity="0.6" style="--i:4"></path>
+    <path class="d" pathLength="1" d={iso.edges} stroke={soft} stroke-width="1" style="--i:4"></path>
+    <path class="d" pathLength="1" d={iso.front} stroke={line} stroke-width="2" style="--i:5"></path>
+  </g>
+  <!-- dims on side view -->
+  <g stroke={soft} stroke-width="1" fill="none">
+    <path d={`M${side[0][0]} 160 V178 M${side[1][0]} 160 V178 M${side[0][0] + 3} 172 H${side[1][0] - 3}`}></path>
+    <path d={`M${side[0][0] + 3} 172 l7 -3.5 v7Z M${side[1][0] - 3} 172 l-7 -3.5 v7Z`} fill={soft}></path>
+    <path d={`M${side[1][0] + 8} ${side[5][1]} H${side[1][0] + 26} M${side[1][0] + 8} ${side[1][1]} H${side[1][0] + 26} M${side[1][0] + 20} ${side[5][1] + 3} V${side[1][1] - 3}`}></path>
+  </g>
+  <g class="mono" font-size="13" fill={soft}>
+    <text x={(side[0][0] + side[1][0]) / 2} y="196" text-anchor="middle">{f.mm(86)}</text>
+    <text x={side[1][0] + 28} y={(side[5][1] + side[1][1]) / 2}>{f.mm(108)}</text>
+  </g>
+  <!-- arrows between steps -->
+  <g stroke={soft} stroke-width="1.2" stroke-dasharray="4 4" fill="none">
+    <path d="M128 110 H176"></path>
+    <path d="M338 110 H354"></path>
+  </g>
+</svg>

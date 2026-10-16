@@ -1,0 +1,110 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { useDict, plain, type Lang, type RouteKey } from '../i18n';
+import { routes, noindex, ogLocales } from '../i18n/routes';
+import { organizationLd } from '../lib/schema';
+import config from '../../site.config.mjs';
+
+interface Props {
+  lang: Lang;
+  page: RouteKey;
+  /** Overrides for pages that are not in meta (e.g. 404) */
+  title?: string;
+  description?: string;
+  jsonLd?: object[];
+  robots?: string;
+  /** 404 etc.: no canonical / hreflang */
+  bare?: boolean;
+}
+const { lang, page, jsonLd = [], robots, bare = false } = Astro.props;
+const t = useDict(lang);
+const meta = (t.meta as Record<string, { title: string; description: string }>)[page] ?? t.meta.home;
+const title = Astro.props.title ?? meta.title;
+const description = plain(Astro.props.description ?? meta.description);
+const site = config.url.replace(/\/$/, '');
+const canonical = site + routes[page][lang];
+const ogImage = `${site}/og/${page}.png`;
+const isNoindex = robots ?? (noindex.includes(page) ? 'noindex, follow' : undefined);
+const ld = [organizationLd(lang), ...jsonLd];
+---
+
+<!doctype html>
+<html lang={lang} dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    {
+      !bare && (
+        <>
+          <link rel="canonical" href={canonical} />
+        </>
+      )
+    }
+    {isNoindex && <meta name="robots" content={isNoindex} />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={config.brand.name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {!bare && <meta property="og:url" content={canonical} />}
+    <meta property="og:locale" content={ogLocales[lang]} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#f3eee3" />
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
+    {ld.map((o) => <script type="application/ld+json" set:html={JSON.stringify(o)} />)}
+  </head>
+  <body class="min-h-screen">
+    <a
+      href="#main"
+      class="mono sr-only z-50 bg-ink px-4 py-3 text-paper focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
+    >
+      {t.ui.skip}
+    </a>
+    <Header lang={lang} page={page} />
+    <main id="main" tabindex="-1" class="outline-none">
+      <slot />
+    </main>
+    <Footer lang={lang} page={page} />
+
+    <script>
+      // Reveal-on-scroll + line drawing. Static if IntersectionObserver is missing.
+      const els = document.querySelectorAll<HTMLElement>('[data-reveal], .draw');
+      if (!('IntersectionObserver' in window)) {
+        els.forEach((el) => el.classList.add('in'));
+      } else {
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('in');
+                io.unobserve(e.target);
+              }
+            });
+          },
+          { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+        );
+        els.forEach((el) => io.observe(el));
+      }
+    </script>
+  </body>
+</html>
