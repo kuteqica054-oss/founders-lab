@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200" viewBox="0 0 1200 1200">
+  <defs>
+    <pattern id="g8" width="12" height="12" patternUnits="userSpaceOnUse"><path d="M12 0H0V12" fill="none" stroke="#2c2925" stroke-width="1"/></pattern>
+    <pattern id="g60" width="60" height="60" patternUnits="userSpaceOnUse"><rect width="60" height="60" fill="url(#g8)"/><path d="M60 0H0V60" fill="none" stroke="#3a3631" stroke-width="1.2"/></pattern>
+  </defs>
+  <rect width="1200" height="1200" fill="#1f1d1a"/>
+  <rect width="1200" height="1200" fill="url(#g60)" opacity="0.7"/>
+
+  <!-- registration corners -->
+  <g stroke="#f3eee3" stroke-width="6" fill="none" stroke-linecap="square">
+    <path d="M60 130V60H130"/><path d="M1070 60H1140V130"/><path d="M60 1070V1140H130"/><path d="M1140 1070V1140H1070"/>
+  </g>
+
+  <!-- mark: crosshair, as on the site -->
+  <circle cx="600" cy="400" r="220" fill="none" stroke="#8fb0e6" stroke-width="2.5" stroke-dasharray="10 10" opacity="0.8"/>
+  <g stroke="#f3eee3" stroke-width="24" fill="none" stroke-linecap="butt">
+    <circle cx="600" cy="400" r="140"/>
+    <path d="M600 155V315M600 485V645M355 400H515M685 400H845"/>
+  </g>
+  <circle cx="600" cy="400" r="48" fill="#f25c19"/>
+  <!-- drawing callout on the dashed circle -->
+  <path d="M756 244L830 170H930" fill="none" stroke="#8fb0e6" stroke-width="2.5"/>
+  <circle cx="756" cy="244" r="6" fill="#8fb0e6"/>
+  <text x="840" y="156" font-family="IBM Plex Mono Medium, IBM Plex Mono" font-size="28" fill="#8fb0e6">v1 → v3</text>
+
+  <!-- wordmark -->
+  <text x="600" y="845" text-anchor="middle" font-family="Bricolage Grotesque" font-weight="700" font-size="190" letter-spacing="-6" fill="#f3eee3">Founders</text>
+  <rect x="471.2" y="880" width="257.6" height="132" rx="4" fill="none" stroke="#f3eee3" stroke-width="7"/>
+  <text x="600" y="981" text-anchor="middle" font-family="IBM Plex Mono Medium, IBM Plex Mono" font-size="112" fill="#f3eee3">Lab</text>
+
+  <!-- tagline -->
+  <text x="600" y="1090" text-anchor="middle" font-family="IBM Plex Mono Medium, IBM Plex Mono" font-size="30" letter-spacing="2" fill="#a39b8e">Prototyping studio · Boston, MA</text>
+</svg>
